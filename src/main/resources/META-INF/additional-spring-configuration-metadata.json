@@ -1,0 +1,57 @@
+{"properties": [
+  {
+    "name": "spring.datasource.secondary.url",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.url'"
+  },
+  {
+    "name": "spring.datasource.secondary.hikari.connection-timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.hikari.connection-timeout'"
+  },
+  {
+    "name": "spring.datasource.secondary.hikari.maximum-pool-size",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.hikari.maximum-pool-size'"
+  },
+  {
+    "name": "spring.datasource.secondary.hikari.minimum-idle",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.hikari.minimum-idle'"
+  },
+  {
+    "name": "spring.datasource.secondary.driver-class-name",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.driver-class-name'"
+  },
+  {
+    "name": "spring.datasource.secondary.password",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.password'"
+  },
+  {
+    "name": "spring.datasource.secondary.username",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.username'"
+  },
+  {
+    "name": "spring.datasource.secondary.hikari.idle-timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.hikari.idle-timeout'"
+  },
+  {
+    "name": "spring.datasource.secondary.hikari.max-lifetime",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.hikari.max-lifetime'"
+  },
+  {
+    "name": "spring.datasource.secondary.jpa.hibernate.ddl-auto",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.jpa.hibernate.ddl-auto'"
+  },
+  {
+    "name": "spring.datasource.secondary.jpa.database-platform",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.secondary.jpa.database-platform'"
+  }
+]}
