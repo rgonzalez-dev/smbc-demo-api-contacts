@@ -58,7 +58,7 @@ public class ContactServiceImpl implements ContactService {
             businessEventRepository.save(businessEvent);
 
             // Send the event to Kafka with aggregate id as the message key
-            businessEventKafkaTemplate.send(KafkaConfig.BUSINESS_EVENTS_TOPIC,
+            businessEventKafkaTemplate.send(KafkaConfig.CONTACTS_TOPIC,
                     businessEvent.getAggregateId(), businessEvent);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create business event for contact", e);

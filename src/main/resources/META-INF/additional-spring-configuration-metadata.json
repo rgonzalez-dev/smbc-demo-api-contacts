@@ -53,5 +53,10 @@
     "name": "spring.datasource.secondary.jpa.database-platform",
     "type": "java.lang.String",
     "description": "A description for 'spring.datasource.secondary.jpa.database-platform'"
+  },
+  {
+    "name": "kafka.auto-create-topics",
+    "type": "java.lang.String",
+    "description": "A description for 'kafka.auto-create-topics'"
   }
 ]}
