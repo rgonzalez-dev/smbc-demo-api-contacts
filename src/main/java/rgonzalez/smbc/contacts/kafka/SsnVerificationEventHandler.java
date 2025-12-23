@@ -1,5 +1,7 @@
 package rgonzalez.smbc.contacts.kafka;
 
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -62,6 +64,11 @@ public class SsnVerificationEventHandler {
                     verificationResult.isMatching());
 
             // Persist the verification result to database
+            // Clear the ID to ensure it's treated as a new record
+            verificationResult.setId(null);
+            verificationResult.setCreatedBy("system");
+            verificationResult.setUpdatedBy("system");
+            verificationResult.setUpdatedTimestamp(LocalDateTime.now());
             SsnVerificationResult persistedResult = ssnVerificationResultRepository.save(verificationResult);
             logger.debug("SSN verification result persisted to database with id [{}]", persistedResult.getId());
 
