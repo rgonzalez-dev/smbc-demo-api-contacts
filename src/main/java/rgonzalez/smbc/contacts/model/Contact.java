@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,7 @@ public class Contact {
     @Column(length = 1)
     private String middleInitial;
 
+    @JsonIgnore
     @Column(nullable = false, length = 20)
     private String ssnVerificationStatus = "not-verified";
 

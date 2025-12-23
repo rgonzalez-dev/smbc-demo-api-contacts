@@ -32,6 +32,8 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
+        // Don't include type headers for BusinessEvent since integration-api expects
+        // its own type
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
@@ -45,23 +47,4 @@ public class KafkaProducerConfig {
         return new KafkaTemplate<>(businessEventProducerFactory);
     }
 
-    /**
-     * Producer Factory for String key-value pairs
-     */
-    @Bean
-    public ProducerFactory<String, String> producerFactory() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps);
-    }
-
-    /**
-     * KafkaTemplate for sending String messages
-     */
-    @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
 }
