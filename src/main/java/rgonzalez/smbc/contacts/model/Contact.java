@@ -7,6 +7,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +24,21 @@ public class Contact {
 
     @Column(nullable = false, length = 255)
     private String name;
+
+    @Column(nullable = false, length = 11)
+    private String ssn;
+
+    @Column(nullable = false, length = 100)
+    private String firstName;
+
+    @Column(nullable = false, length = 100)
+    private String lastName;
+
+    @Column(length = 1)
+    private String middleInitial;
+
+    @Column(nullable = false, length = 20)
+    private String ssnVerificationStatus = "not-verified";
 
     @CreatedBy
     @Column(nullable = false, updatable = false, length = 100)
@@ -40,20 +57,27 @@ public class Contact {
     private LocalDateTime updatedTimestamp;
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<Phone> phones = new HashSet<>();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<Email> emails = new HashSet<>();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<Address> addresses = new HashSet<>();
 
     // Constructors
     public Contact() {
     }
 
-    public Contact(String name) {
+    public Contact(String name, String ssn, String firstName, String lastName, String middleInitial) {
         this.name = name;
+        this.ssn = ssn;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.middleInitial = middleInitial;
     }
 
     // Getters and Setters
@@ -71,6 +95,46 @@ public class Contact {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSsn() {
+        return ssn;
+    }
+
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getMiddleInitial() {
+        return middleInitial;
+    }
+
+    public void setMiddleInitial(String middleInitial) {
+        this.middleInitial = middleInitial;
+    }
+
+    public String getSsnVerificationStatus() {
+        return ssnVerificationStatus;
+    }
+
+    public void setSsnVerificationStatus(String ssnVerificationStatus) {
+        this.ssnVerificationStatus = ssnVerificationStatus;
     }
 
     public String getCreatedBy() {

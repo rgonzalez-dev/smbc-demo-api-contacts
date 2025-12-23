@@ -5,9 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rgonzalez.smbc.contacts.config.KafkaConfig;
+
+import rgonzalez.smbc.contacts.config.KafkaTopicConfig;
 import rgonzalez.smbc.contacts.model.BusinessEvent;
 import rgonzalez.smbc.contacts.model.Contact;
+
 import rgonzalez.smbc.contacts.repository.BusinessEventRepository;
 import rgonzalez.smbc.contacts.repository.ContactRepository;
 import rgonzalez.smbc.contacts.service.ContactService;
@@ -50,7 +52,8 @@ public class ContactServiceImpl implements ContactService {
                     "Contact",
                     "ContactCreated",
                     eventPayload,
-                    "contact-created-v1");
+                    "contact-created-v1", null,
+                    BusinessEvent.EventDirection.OUTBOUND);
             businessEvent.setCreatedBy("system"); // Set createdBy if needed
             businessEvent.setUpdatedBy("system"); // Set updatedBy if needed
             businessEvent.setUpdatedTimestamp(LocalDateTime.now());
@@ -58,7 +61,7 @@ public class ContactServiceImpl implements ContactService {
             businessEventRepository.save(businessEvent);
 
             // Send the event to Kafka with aggregate id as the message key
-            businessEventKafkaTemplate.send(KafkaConfig.CONTACTS_TOPIC,
+            businessEventKafkaTemplate.send(KafkaTopicConfig.CONTACTS_TOPIC,
                     businessEvent.getAggregateId(), businessEvent);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create business event for contact", e);

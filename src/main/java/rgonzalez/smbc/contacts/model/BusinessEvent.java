@@ -36,6 +36,13 @@ public class BusinessEvent {
     @Column(nullable = false, length = 500)
     private String schema;
 
+    @Column(nullable = true, length = 100)
+    private String correlationId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private BusinessEvent.EventDirection eventDirection;
+
     @CreatedBy
     @Column(nullable = false, updatable = false, length = 100)
     private String createdBy;
@@ -57,13 +64,16 @@ public class BusinessEvent {
     }
 
     public BusinessEvent(String eventId, String aggregateId, String aggregateName,
-            String eventName, String eventPayload, String schema) {
+            String eventName, String eventPayload, String schema, String correlationId,
+            BusinessEvent.EventDirection eventDirection) {
         this.eventId = eventId;
         this.aggregateId = aggregateId;
         this.aggregateName = aggregateName;
         this.eventName = eventName;
         this.eventPayload = eventPayload;
         this.schema = schema;
+        this.correlationId = correlationId;
+        this.eventDirection = eventDirection;
     }
 
     // Getters and Setters
@@ -123,6 +133,22 @@ public class BusinessEvent {
         this.schema = schema;
     }
 
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+    }
+
+    public BusinessEvent.EventDirection getEventDirection() {
+        return eventDirection;
+    }
+
+    public void setEventDirection(BusinessEvent.EventDirection eventDirection) {
+        this.eventDirection = eventDirection;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -165,10 +191,27 @@ public class BusinessEvent {
                 ", eventName='" + eventName + '\'' +
                 ", eventPayload='" + eventPayload + '\'' +
                 ", schema='" + schema + '\'' +
+                ", correlationId='" + correlationId + '\'' +
+                ", eventDirection='" + eventDirection + '\'' +
                 ", createdBy='" + createdBy + '\'' +
                 ", createdTimestamp=" + createdTimestamp +
                 ", updatedBy='" + updatedBy + '\'' +
                 ", updatedTimestamp=" + updatedTimestamp +
                 '}';
+    }
+
+    public enum EventDirection {
+        OUTBOUND("outbound"),
+        INBOUND("inbound");
+
+        private final String displayName;
+
+        EventDirection(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 }
