@@ -86,13 +86,12 @@ stages:
       - job: DeployToWebApp
         displayName: Deploy to App Service
         steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: Download Build Artifacts
+          - task: DownloadPipelineArtifact@2
+            displayName: Download JAR Artifact
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: 'drop'
-              downloadPath: '$(System.ArtifactsDirectory)'
+              targetPath: '$(Pipeline.Workspace)/drop'
             continueOnError: true
 
           - task: AzureWebApp@1
@@ -103,7 +102,7 @@ stages:
               appName: '$(WEBAPP_NAME)'
               runtimeStack: 'JAVA|17-java17'
               startupCommand: 'java -jar /home/site/wwwroot/app.jar --server.port=80'
-              package: '$(Build.ArtifactStagingDirectory)/**/*.jar'
+              package: '$(Pipeline.Workspace)/drop'
               deploymentMethod: 'zipDeploy'
             continueOnError: true
 
