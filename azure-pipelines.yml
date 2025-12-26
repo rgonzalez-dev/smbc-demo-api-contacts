@@ -12,7 +12,7 @@ variables:
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
   imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
-  WEBAPP_NAME: 'contacts-api-webapp'  # Update this with your actual App Service name
+  WEBAPP_NAME: 'webapp-contacts-api'  # Update this with your actual App Service name
 
 stages:
   - stage: Build
