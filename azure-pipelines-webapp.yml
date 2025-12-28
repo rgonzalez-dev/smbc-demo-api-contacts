@@ -1,0 +1,86 @@
+trigger:
+  - main
+  - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  WEBAPP_NAME: 'webapp-contacts-api-a'  # Update this with your actual App Service name
+  RESOURCE_GROUP: 'rgonzalez-resource-group-a'  # Update with your resource group
+
+stages:
+  - stage: Build
+    displayName: Build and Package JAR
+    jobs:
+      - job: BuildAndPackage
+        displayName: Build and Package
+        steps:
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '-Xmx3072m'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '17'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              goals: 'clean package'
+            displayName: 'Maven Build'
+
+          - task: CopyFiles@2
+            displayName: Copy JAR to Staging Directory
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/target'
+              Contents: '*.jar'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Build Artifacts
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+
+  - stage: DeployWebApp
+    displayName: Deploy to Azure App Service
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: DeployToWebApp
+        displayName: Deploy to App Service
+        steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: Download JAR Artifact
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              targetPath: '$(Pipeline.Workspace)/drop'
+
+          - task: AzureWebApp@1
+            displayName: Deploy to Azure App Service
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              appType: 'webAppLinux'
+              appName: '$(WEBAPP_NAME)'
+              runtimeStack: 'JAVA|17-java17'
+              startupCommand: 'java -jar /home/site/wwwroot/app.jar --server.port=80'
+              package: '$(Pipeline.Workspace)/drop'
+              deploymentMethod: 'zipDeploy'
+
+          - task: AzureCLI@2
+            displayName: Verify Deployment
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Verifying deployment..."
+                STATUS=$(az webapp show -g $(RESOURCE_GROUP) -n $(WEBAPP_NAME) --query state -o tsv)
+                echo "App Service Status: $STATUS"
+                
+                if [ "$STATUS" = "Running" ]; then
+                  echo "✓ Deployment successful - App Service is running"
+                else
+                  echo "⚠ App Service state: $STATUS"
+                fi

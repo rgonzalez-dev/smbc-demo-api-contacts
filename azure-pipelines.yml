@@ -1,141 +1,91 @@
-trigger:
-  - main
-  - develop
+# Azure Pipelines Configuration - Multiple Deployment Options
+#
+# This repository contains three separate Azure Pipelines configurations:
+#
+# 1. azure-pipelines-aks.yml
+#    - For Kubernetes (AKS) deployments
+#    - Builds Docker image and pushes to container registry
+#    - Deploys to AKS cluster
+#    - Registers API in Azure API Management (APIM)
+#    - Use this pipeline for production K8s deployments
+#
+# 2. azure-pipelines-webapp.yml
+#    - For Azure App Service (Web App) deployments
+#    - Builds JAR artifact
+#    - Deploys to App Service with proper startup command
+#    - Verifies deployment status
+#    - Use this pipeline for Web App deployments
+#
+# 3. azure-pipelines-container-apps.yml
+#    - For Azure Container Apps deployments
+#    - Builds Docker image and pushes to container registry
+#    - Creates/manages Container Apps environment
+#    - Deploys container and handles scaling
+#    - Verifies deployment and tests health endpoint
+#    - Use this pipeline for serverless container deployments
+#
+# How to Configure in Azure Pipelines:
+#
+# For AKS Deployment:
+#   1. Go to Azure Pipelines
+#   2. Create new pipeline
+#   3. Select "Existing Azure Pipelines YAML file"
+#   4. Choose "azure-pipelines-aks.yml"
+#   5. Configure variables:
+#      - AZURE_CONTAINER_REGISTRY: your-registry.azurecr.io
+#      - Ensure service connections exist: AzureContainerRegistry, AKS-Connection
+#
+# For Web App Deployment:
+#   1. Go to Azure Pipelines
+#   2. Create new pipeline
+#   3. Select "Existing Azure Pipelines YAML file"
+#   4. Choose "azure-pipelines-webapp.yml"
+#   5. Configure variables in the YAML:
+#      - WEBAPP_NAME: your actual App Service name
+#      - RESOURCE_GROUP: your resource group name
+#      - Ensure service connection exists: AzureServiceConnection
+#
+# For Container Apps Deployment:
+#   1. Go to Azure Pipelines
+#   2. Create new pipeline
+#   3. Select "Existing Azure Pipelines YAML file"
+#   4. Choose "azure-pipelines-container-apps.yml"
+#   5. Configure variables in the YAML:
+#      - containerAppName: desired container app name
+#      - containerAppEnvironment: environment name
+#      - resourceGroup: your resource group
+#      - location: Azure region (eastus, westus, etc.)
+#   6. Ensure service connections exist: AzureContainerRegistry, AzureServiceConnection
+#
+# Environment Configuration:
+#
+# For Web App deployments, configure these application settings in App Service:
+#   - SPRING_DATASOURCE_URL
+#   - SPRING_DATASOURCE_USERNAME
+#   - SPRING_DATASOURCE_PASSWORD
+#   - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+#   - SPRING_PROFILES_ACTIVE=production (or your target profile)
+#
+# For Container Apps deployments, configure via Azure CLI or Portal:
+#   - Environment variables in container app settings
+#   - ConfigMaps and Secrets for sensitive data
+#   - Scaling rules based on CPU/memory/HTTP requests
+#
+# For AKS deployments, configure these in deployment manifests (k8s/*.yaml):
+#   - Environment variables in pod spec
+#   - ConfigMaps and Secrets for sensitive data
+#
+# VS Code Deployment:
+#
+# For direct VS Code deployment to Container Apps, see:
+#   AZURE_CONTAINER_APPS_DEPLOYMENT.md
+#
+# This provides step-by-step instructions for:
+#   1. Building and pushing Docker images
+#   2. Creating Container Apps environment
+#   3. Deploying container apps with VS Code extensions
+#   4. Configuring environment variables and scaling
+#   5. Troubleshooting and monitoring
+#   - ConfigMaps and Secrets for sensitive data
 
-pool:
-  vmImage: 'ubuntu-latest'
-
-variables:
-  dockerRegistryServiceConnection: 'AzureContainerRegistry'
-  imageRepository: 'contacts-api'
-  containerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
-  imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
-  WEBAPP_NAME: 'webapp-contacts-api'  # Update this with your actual App Service name
-
-stages:
-  - stage: Build
-    displayName: Build and Push Docker Image
-    jobs:
-      - job: BuildAndPush
-        displayName: Build and Push
-        steps:
-          - task: Maven@3
-            inputs:
-              mavenPomFile: 'pom.xml'
-              mavenOptions: '-Xmx3072m'
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '17'
-              jdkArchitectureOption: 'x64'
-              publishJUnitResults: true
-              testResultsFiles: '**/surefire-reports/TEST-*.xml'
-              goals: 'clean package'
-            displayName: 'Maven Build'
-
-          - task: CopyFiles@2
-            displayName: Copy JAR to Staging Directory
-            inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/target'
-              Contents: '*.jar'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-          - task: PublishBuildArtifacts@1
-            displayName: Publish Build Artifacts
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: 'drop'
-              publishLocation: 'Container'
-
-          - task: Docker@2
-            displayName: Build and Push image to container registry
-            inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(tag)
-                latest
-
-  - stage: Deploy
-    displayName: Deploy to AKS
-    dependsOn: Build
-    condition: succeeded()
-    jobs:
-      - job: DeployToAKS
-        displayName: Deploy to AKS
-        steps:
-          - task: KubernetesManifest@0
-            displayName: Deploy to Kubernetes
-            inputs:
-              action: 'deploy'
-              kubernetesServiceConnection: 'AKS-Connection'
-              namespace: 'default'
-              manifests: |
-                $(Pipeline.Workspace)/manifests/contacts-api-deployment.yaml
-                $(Pipeline.Workspace)/manifests/contacts-api-service.yaml
-              containers: |
-                $(imageName)
-
-  - stage: DeployWebApp
-    displayName: Deploy to Azure App Service (Optional)
-    dependsOn: Build
-    condition: succeeded()
-    jobs:
-      - job: DeployToWebApp
-        displayName: Deploy to App Service
-        steps:
-          - task: DownloadPipelineArtifact@2
-            displayName: Download JAR Artifact
-            inputs:
-              buildType: 'current'
-              artifactName: 'drop'
-              targetPath: '$(Pipeline.Workspace)/drop'
-            continueOnError: true
-
-          - task: AzureWebApp@1
-            displayName: Deploy to Azure App Service
-            inputs:
-              azureSubscription: 'AzureServiceConnection'
-              appType: 'webAppLinux'
-              appName: '$(WEBAPP_NAME)'
-              runtimeStack: 'JAVA|17-java17'
-              startupCommand: 'java -jar /home/site/wwwroot/app.jar --server.port=80'
-              package: '$(Pipeline.Workspace)/drop'
-              deploymentMethod: 'zipDeploy'
-            continueOnError: true
-
-  - stage: RegisterAPIM
-    displayName: Register API in APIM
-    dependsOn: Deploy
-    condition: succeeded()
-    jobs:
-      - job: RegisterAPIM
-        displayName: Register/Update APIM
-        steps:
-          - task: AzureCLI@2
-            displayName: Register API in APIM
-            inputs:
-              azureSubscription: 'AzureServiceConnection'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                # Variables
-                RESOURCE_GROUP="your-resource-group"
-                APIM_NAME="your-apim-instance"
-                API_NAME="contacts-api"
-                BACKEND_URL="http://contacts-api.default.svc.cluster.local:8080"
-                
-                # Check if API exists
-                if az apim api show --resource-group $RESOURCE_GROUP --service-name $APIM_NAME --api-id $API_NAME &>/dev/null; then
-                  echo "API exists, updating backend URL..."
-                  az apim api update --resource-group $RESOURCE_GROUP --service-name $APIM_NAME --api-id $API_NAME --service-url $BACKEND_URL
-                else
-                  echo "Creating new API in APIM..."
-                  az apim api create --resource-group $RESOURCE_GROUP --service-name $APIM_NAME --api-id $API_NAME \
-                    --display-name "Contacts API" --service-url $BACKEND_URL --protocols http https \
-                    --path "/api/contacts" --api-type http
-                fi
-                
-                echo "APIM registration complete for $API_NAME"
+# This file is kept for reference only. Select the appropriate pipeline for your deployment target.

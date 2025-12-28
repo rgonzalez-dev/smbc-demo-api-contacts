@@ -1,0 +1,207 @@
+trigger:
+  - main
+  - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerRegistryServiceConnection: 'AzureContainerRegistry'
+  imageRepository: 'contacts-api'
+  containerRegistry: '$(AZURE_CONTAINER_REGISTRY)'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+  imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
+  containerAppName: 'contacts-api-app'
+  containerAppEnvironment: 'contacts-api-env'
+  resourceGroup: 'your-resource-group'  # Update this
+  location: 'eastus'  # Update this
+
+stages:
+  - stage: Build
+    displayName: Build and Push Docker Image
+    jobs:
+      - job: BuildAndPush
+        displayName: Build and Push
+        steps:
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '-Xmx3072m'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '17'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              goals: 'clean package'
+            displayName: 'Maven Build'
+
+          - task: Docker@0
+            inputs:
+              action: 'login'
+              containerregistrytype: 'Azure Container Registry'
+              azureSubscriptionEndpoint: 'AzureServiceConnection'
+              azureContainerRegistry: '$(containerRegistry)'
+            displayName: 'Login to ACR'
+
+          - script: |
+              docker build -t $(imageName) -f $(dockerfilePath) .
+              docker tag $(imageName) $(containerRegistry)/$(imageRepository):latest
+              docker push $(imageName)
+              docker push $(containerRegistry)/$(imageRepository):latest
+            displayName: 'Build and Push Docker Image'
+            env:
+              DOCKER_BUILDKIT: 1
+
+  - stage: CreateEnvironment
+    displayName: Create Container Apps Environment (if needed)
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: CreateEnvironment
+        displayName: Create or Verify Environment
+        steps:
+          - task: AzureCLI@2
+            displayName: Create Container Apps Environment
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Check if environment exists
+                ENV_EXISTS=$(az containerapp env list --resource-group $(resourceGroup) --query "[?name=='$(containerAppEnvironment)'].id" -o tsv)
+                
+                if [ -z "$ENV_EXISTS" ]; then
+                  echo "Creating Container Apps Environment..."
+                  az containerapp env create \
+                    --name $(containerAppEnvironment) \
+                    --resource-group $(resourceGroup) \
+                    --location $(location)
+                  echo "✓ Environment created"
+                else
+                  echo "✓ Environment already exists"
+                fi
+
+  - stage: DeployContainerApp
+    displayName: Deploy to Container Apps
+    dependsOn: CreateEnvironment
+    condition: succeeded()
+    jobs:
+      - job: DeployToContainerApp
+        displayName: Deploy Container App
+        steps:
+          - task: AzureCLI@2
+            displayName: Deploy or Update Container App
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Check if container app exists
+                APP_EXISTS=$(az containerapp list --resource-group $(resourceGroup) --query "[?name=='$(containerAppName)'].id" -o tsv)
+                
+                if [ -z "$APP_EXISTS" ]; then
+                  echo "Creating new Container App..."
+                  az containerapp create \
+                    --name $(containerAppName) \
+                    --resource-group $(resourceGroup) \
+                    --environment $(containerAppEnvironment) \
+                    --image $(imageName) \
+                    --target-port 8080 \
+                    --ingress external \
+                    --registry-server $(containerRegistry) \
+                    --registry-username $(AZURE_REGISTRY_USERNAME) \
+                    --registry-password $(AZURE_REGISTRY_PASSWORD) \
+                    --env-vars \
+                      SPRING_PROFILES_ACTIVE=production \
+                      SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver \
+                    --cpu 0.5 \
+                    --memory 1.0Gi \
+                    --min-replicas 1 \
+                    --max-replicas 3
+                  echo "✓ Container App created"
+                else
+                  echo "Updating existing Container App..."
+                  az containerapp update \
+                    --name $(containerAppName) \
+                    --resource-group $(resourceGroup) \
+                    --image $(imageName)
+                  echo "✓ Container App updated"
+                fi
+
+          - task: AzureCLI@2
+            displayName: Get Container App Info
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Container App Information:"
+                FQDN=$(az containerapp show \
+                  --name $(containerAppName) \
+                  --resource-group $(resourceGroup) \
+                  --query properties.configuration.ingress.fqdn -o tsv)
+                echo "FQDN: https://$FQDN"
+                echo ""
+                echo "To test the endpoint:"
+                echo "curl https://$FQDN/actuator/health"
+
+  - stage: Verify
+    displayName: Verify Deployment
+    dependsOn: DeployContainerApp
+    condition: succeeded()
+    jobs:
+      - job: VerifyDeployment
+        displayName: Verify and Test
+        steps:
+          - task: AzureCLI@2
+            displayName: Verify Container App Health
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Verifying Container App deployment..."
+                
+                # Get container app status
+                STATE=$(az containerapp show \
+                  --name $(containerAppName) \
+                  --resource-group $(resourceGroup) \
+                  --query properties.runningStatus -o tsv)
+                
+                echo "Container App State: $STATE"
+                
+                # Get FQDN and test endpoint
+                FQDN=$(az containerapp show \
+                  --name $(containerAppName) \
+                  --resource-group $(resourceGroup) \
+                  --query properties.configuration.ingress.fqdn -o tsv)
+                
+                echo "Waiting for app to be ready..."
+                sleep 30
+                
+                # Test health endpoint
+                HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$FQDN/actuator/health)
+                
+                if [ "$HEALTH_STATUS" = "200" ]; then
+                  echo "✓ Health check passed (HTTP $HEALTH_STATUS)"
+                  echo "✓ Application is running at https://$FQDN"
+                else
+                  echo "⚠ Health check returned HTTP $HEALTH_STATUS"
+                  echo "App URL: https://$FQDN"
+                  echo "Check logs: az containerapp logs show --name $(containerAppName) --resource-group $(resourceGroup) --follow"
+                fi
+
+          - task: AzureCLI@2
+            displayName: Display Recent Logs
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Recent Container App Logs:"
+                az containerapp logs show \
+                  --name $(containerAppName) \
+                  --resource-group $(resourceGroup) \
+                  --tail 20
+            continueOnError: true
