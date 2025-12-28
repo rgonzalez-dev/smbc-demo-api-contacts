@@ -32,16 +32,18 @@ stages:
               goals: 'clean package'
             displayName: 'Maven Build'
 
-          - task: Docker@2
-            displayName: Build and Push image to container registry
-            inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(tag)
-                latest
+          - script: |
+              echo "$(AZURE_REGISTRY_PASSWORD)" | docker login -u $(AZURE_REGISTRY_USERNAME) --password-stdin $(containerRegistry)
+            displayName: 'Login to ACR'
+
+          - script: |
+              docker build -t $(imageName) -f $(dockerfilePath) .
+              docker tag $(imageName) $(containerRegistry)/$(imageRepository):latest
+              docker push $(imageName)
+              docker push $(containerRegistry)/$(imageRepository):latest
+            displayName: 'Build and Push Docker Image'
+            env:
+              DOCKER_BUILDKIT: 1
 
   - stage: DeployAKS
     displayName: Deploy to AKS
