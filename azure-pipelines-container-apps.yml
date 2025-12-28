@@ -36,12 +36,8 @@ stages:
               goals: 'clean package'
             displayName: 'Maven Build'
 
-          - task: Docker@0
-            inputs:
-              action: 'login'
-              containerregistrytype: 'Azure Container Registry'
-              azureSubscriptionEndpoint: 'AzureServiceConnection'
-              azureContainerRegistry: '$(containerRegistry)'
+          - script: |
+              echo "$(AZURE_REGISTRY_PASSWORD)" | docker login -u $(AZURE_REGISTRY_USERNAME) --password-stdin $(containerRegistry)
             displayName: 'Login to ACR'
 
           - script: |
