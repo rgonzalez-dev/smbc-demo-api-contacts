@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: contacts-api
-        image: YOUR_ACR_NAME.azurecr.io/contacts-api:latest
+        image: rgonzalez.azurecr.io/contacts-api:latest
         imagePullPolicy: Always
         ports:
         - name: http
