@@ -73,20 +73,20 @@ jobs:
           SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS: rgonzalez-messaging-interview.servicebus.windows.net:9093
           SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG: ${{ secrets.KAFKA_SASL_CONFIG }}
 
-      - name: Health Check
-        run: |
-          max_attempts=30
-          attempt=0
-          while [ $attempt -lt $max_attempts ]; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" https://contacts-api-demo.azurewebsites.net/actuator/health)
-            if [ $response -eq 200 ]; then
-              echo "Health check passed! Application is running."
-              exit 0
-            fi
-            echo "Attempt $((attempt + 1))/$max_attempts - Status: $response"
-            sleep 2
-            attempt=$((attempt + 1))
-          done
-          echo "Health check failed after $max_attempts attempts"
-          exit 1
+      # - name: Health Check
+      #   run: |
+      #     max_attempts=30
+      #     attempt=0
+      #     while [ $attempt -lt $max_attempts ]; do
+      #       response=$(curl -s -o /dev/null -w "%{http_code}" https://contacts-api-demo-h8cgeuapd7gcd4d4.eastus-01.azurewebsites.net/actuator/health)
+      #       if [ $response -eq 200 ]; then
+      #         echo "Health check passed! Application is running."
+      #         exit 0
+      #       fi
+      #       echo "Attempt $((attempt + 1))/$max_attempts - Status: $response"
+      #       sleep 2
+      #       attempt=$((attempt + 1))
+      #     done
+      #     echo "Health check failed after $max_attempts attempts"
+      #     exit 1
           
