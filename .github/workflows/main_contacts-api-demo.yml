@@ -46,6 +46,11 @@ jobs:
         with:
           name: java-app
           path: '${{ github.workspace }}'
+
+      - name: Rename JAR for deployment
+        run: |
+          cd ${{ github.workspace }}
+          mv contacts-api-*.jar app.jar
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -60,8 +65,8 @@ jobs:
         with:
           app-name: 'contacts-api-demo'
           slot-name: 'Production'
-          package: '${{ github.workspace }}/*.jar'
-          startup-command: 'java -Dspring.profiles.active=mix -Dserver.port=%PORT% -jar *.jar'
+          package: '${{ github.workspace }}/app.jar'
+          startup-command: 'java -Dspring.profiles.active=mix -Dserver.port=%PORT% -jar app.jar'
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data
           SPRING_DATASOURCE_USERNAME: rgonzalez_admin
