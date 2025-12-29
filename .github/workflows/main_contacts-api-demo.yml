@@ -60,4 +60,22 @@ jobs:
           app-name: 'contacts-api-demo'
           slot-name: 'Production'
           package: '*.jar'
+          startup-command: 'java -Dspring.profiles.active=mix -Dserver.port=%PORT% -jar *.jar'
+
+      - name: Health Check
+        run: |
+          max_attempts=30
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://contacts-api-demo.azurewebsites.net/actuator/health)
+            if [ $response -eq 200 ]; then
+              echo "Health check passed! Application is running."
+              exit 0
+            fi
+            echo "Attempt $((attempt + 1))/$max_attempts - Status: $response"
+            sleep 2
+            attempt=$((attempt + 1))
+          done
+          echo "Health check failed after $max_attempts attempts"
+          exit 1
           
