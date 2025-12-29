@@ -45,6 +45,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
+          path: '${{ github.workspace }}'
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -59,7 +60,7 @@ jobs:
         with:
           app-name: 'contacts-api-demo'
           slot-name: 'Production'
-          package: '*.jar'
+          package: '${{ github.workspace }}/*.jar'
           startup-command: 'java -Dspring.profiles.active=mix -Dserver.port=%PORT% -jar *.jar'
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data
