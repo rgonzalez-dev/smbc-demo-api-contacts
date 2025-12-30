@@ -33,7 +33,6 @@ jobs:
           name: java-app
           path: |
             ${{ github.workspace }}/target/*.jar
-            ${{ github.workspace }}/web.config
 
   deploy:
     runs-on: ubuntu-latest
@@ -73,6 +72,9 @@ jobs:
               SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG="${{ secrets.KAFKA_SASL_CONFIG }}"
+            
+            az webapp config set --resource-group rgonzalez-group-demo --name contacts-api-demo \
+              --startup-file "java -Dspring.profiles.active=default,mix -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
