@@ -32,7 +32,7 @@ jobs:
         with:
           name: java-app
           path: |
-            ${{ github.workspace }}/wwwroot/*.jar
+            ${{ github.workspace }}/target/*.jar
             ${{ github.workspace }}/web.config
 
   deploy:
