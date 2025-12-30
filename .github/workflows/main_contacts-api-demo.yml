@@ -60,8 +60,7 @@ jobs:
         with:
           app-name: 'contacts-api-demo'
           slot-name: 'Production'
-          package: '${{ github.workspace }}/contacts-api-0.0.1-SNAPSHOT.jar'
-          startup-command: 'java -Dspring.profiles.active=mix -Dserver.port=%PORT% -jar contacts-api-0.0.1-SNAPSHOT.jar'
+          package: '${{ github.workspace }}'
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data
           SPRING_DATASOURCE_USERNAME: rgonzalez_admin
