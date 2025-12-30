@@ -31,7 +31,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: |
+            ${{ github.workspace }}/target/*.jar
+            ${{ github.workspace }}/web.config
 
   deploy:
     runs-on: ubuntu-latest
@@ -79,7 +81,6 @@ jobs:
           app-name: 'contacts-api-demo'
           slot-name: 'Production'
           package: './app'
-          startup-command: 'java -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar'
 
       # - name: Health Check
       #   run: |
