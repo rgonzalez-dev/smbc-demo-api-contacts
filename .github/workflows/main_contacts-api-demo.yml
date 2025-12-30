@@ -54,32 +54,13 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_674E9FA98B5C474D8688FC42C2B0E053 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_12257B6D9F5044D4961FFE30C9169C0A }}
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'contacts-api-demo'
-          slot-name: 'Production'
-          package: './app'
-          startup-command: 'java -Dspring.profiles.active=mix -Dserver.port=%PORT% -jar /home/site/wwwroot/contacts-api-0.0.1-SNAPSHOT.jar'
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data
-          SPRING_DATASOURCE_USERNAME: rgonzalez_admin
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          SPRING_DATASOURCE_SECONDARY_URL: jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data
-          SPRING_DATASOURCE_SECONDARY_USERNAME: rgonzalez_admin
-          SPRING_DATASOURCE_SECONDARY_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          SPRING_KAFKA_BOOTSTRAP_SERVERS: rgonzalez-messaging-interview.servicebus.windows.net:9093
-          SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: rgonzalez-messaging-interview.servicebus.windows.net:9093
-          SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS: rgonzalez-messaging-interview.servicebus.windows.net:9093
-          SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG: ${{ secrets.KAFKA_SASL_CONFIG }}
-
       - name: Configure App Service Settings
         uses: azure/CLI@v2
         with:
           inlineScript: |
             az webapp config appsettings set --resource-group rgonzalez-group-demo --name contacts-api-demo \
               --settings \
+              SPRING_PROFILES_ACTIVE="mix" \
               SPRING_DATASOURCE_URL="jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data" \
               SPRING_DATASOURCE_USERNAME="rgonzalez_admin" \
               SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
@@ -90,6 +71,15 @@ jobs:
               SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG="${{ secrets.KAFKA_SASL_CONFIG }}"
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'contacts-api-demo'
+          slot-name: 'Production'
+          package: './app'
+          startup-command: 'java -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar'
 
       # - name: Health Check
       #   run: |
