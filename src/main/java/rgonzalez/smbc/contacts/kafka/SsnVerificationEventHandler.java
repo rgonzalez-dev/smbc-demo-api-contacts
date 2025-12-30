@@ -12,7 +12,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rgonzalez.smbc.contacts.config.KafkaConfig;
-import rgonzalez.smbc.contacts.model.Contact;
 import rgonzalez.smbc.contacts.model.SsnVerificationResult;
 import rgonzalez.smbc.contacts.repository.ContactRepository;
 import rgonzalez.smbc.contacts.repository.SsnVerificationResultRepository;

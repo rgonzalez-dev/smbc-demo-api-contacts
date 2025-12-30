@@ -76,12 +76,12 @@ jobs:
             az webapp config set --resource-group rgonzalez-group-demo --name contacts-api-demo \
               --startup-file "java -Dspring.profiles.active=default,mix -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar"
 
-      - name: Clear wwwroot folder
-        uses: azure/CLI@v2
-        with:
-          inlineScript: |
-            az webapp deployment slot config --resource-group rgonzalez-group-demo --name contacts-api-demo --slot Production --auto-swap true
-            az webapp up --resource-group rgonzalez-group-demo --name contacts-api-demo --os-type Linux || true
+      # - name: Clear wwwroot folder
+      #   uses: azure/CLI@v2
+      #   with:
+      #     inlineScript: |
+      #       az webapp deployment slot config --resource-group rgonzalez-group-demo --name contacts-api-demo --slot Production --auto-swap true
+      #       az webapp up --resource-group rgonzalez-group-demo --name contacts-api-demo --os-type Linux || true
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
