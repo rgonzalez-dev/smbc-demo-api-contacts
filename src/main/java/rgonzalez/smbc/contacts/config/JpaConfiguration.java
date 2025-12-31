@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Configuration
-@Profile({ "mix" })
+@Profile({ "mix2" })
 @EnableJpaRepositories(basePackages = "rgonzalez.smbc.contacts.repository", entityManagerFactoryRef = "primaryEntityManagerFactory", transactionManagerRef = "primaryTransactionManager")
 public class JpaConfiguration {
 
