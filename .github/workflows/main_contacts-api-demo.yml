@@ -74,7 +74,7 @@ jobs:
               SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG="${{ secrets.KAFKA_SASL_CONFIG }}"
             
             az webapp config set --resource-group rgonzalez-group-demo --name contacts-api-demo \
-              --startup-file "java -Dspring.profiles.active=default,mix -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar"
+              --startup-file "java -Dspring.profiles.active=default,mix2 -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar"
 
       # - name: Clear wwwroot folder
       #   uses: azure/CLI@v2
