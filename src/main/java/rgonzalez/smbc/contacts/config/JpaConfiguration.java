@@ -115,7 +115,7 @@ public class JpaConfiguration {
 	private java.util.Properties jpaProperties() {
 		java.util.Properties props = new java.util.Properties();
 		props.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-		props.setProperty("hibernate.hbm2ddl.auto", "update");
+		props.setProperty("hibernate.hbm2ddl.auto", "drop-and-create");
 		props.setProperty("hibernate.show_sql", "false");
 		return props;
 	}
