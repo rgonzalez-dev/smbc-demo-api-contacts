@@ -61,7 +61,7 @@ jobs:
           inlineScript: |
             az webapp config appsettings set --resource-group rgonzalez-group-demo --name contacts-api-demo \
               --settings \
-              SPRING_PROFILES_ACTIVE="mix" \
+              SPRING_PROFILES_ACTIVE="mix2" \
               SPRING_DATASOURCE_URL="jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data" \
               SPRING_DATASOURCE_USERNAME="rgonzalez_admin" \
               SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
