@@ -13,11 +13,15 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Configuration
 @Profile({ "mix" })
 @EnableJpaRepositories(basePackages = "rgonzalez.smbc.contacts.repository", entityManagerFactoryRef = "primaryEntityManagerFactory", transactionManagerRef = "primaryTransactionManager")
 public class JpaConfiguration {
+
+	private static final Logger logger = LoggerFactory.getLogger(JpaConfiguration.class);
 
 	@Value("${spring.datasource.url}")
 	private String datasourceUrl;
@@ -51,7 +55,9 @@ public class JpaConfiguration {
 		config.setConnectionTimeout(30000);
 		config.setIdleTimeout(600000);
 		config.setMaxLifetime(1800000);
-		return new HikariDataSource(config);
+		HikariDataSource dataSource = new HikariDataSource(config);
+		logger.info("Initialized primaryDataSource: {}", dataSource.getClass().getSimpleName());
+		return dataSource;
 	}
 
 	@Bean
@@ -63,6 +69,8 @@ public class JpaConfiguration {
 		emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 		emf.setJpaProperties(jpaProperties());
 		emf.setPersistenceUnitName("primary");
+		logger.info("Initialized primaryEntityManagerFactory: {} with persistence unit: primary",
+				emf.getClass().getSimpleName());
 		return emf;
 	}
 
@@ -72,6 +80,7 @@ public class JpaConfiguration {
 			LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory) {
 		JpaTransactionManager tm = new JpaTransactionManager();
 		tm.setEntityManagerFactory(primaryEntityManagerFactory.getObject());
+		logger.info("Initialized primaryTransactionManager: {}", tm.getClass().getSimpleName());
 		return tm;
 	}
 
@@ -88,7 +97,9 @@ public class JpaConfiguration {
 		config.setConnectionTimeout(30000);
 		config.setIdleTimeout(600000);
 		config.setMaxLifetime(1800000);
-		return new HikariDataSource(config);
+		HikariDataSource dataSource = new HikariDataSource(config);
+		logger.info("Initialized secondaryDataSource: {}", dataSource.getClass().getSimpleName());
+		return dataSource;
 	}
 
 	@Bean
@@ -99,6 +110,8 @@ public class JpaConfiguration {
 		emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 		emf.setJpaProperties(jpaProperties());
 		emf.setPersistenceUnitName("secondary");
+		logger.info("Initialized secondaryEntityManagerFactory: {} with persistence unit: secondary",
+				emf.getClass().getSimpleName());
 		return emf;
 	}
 
@@ -107,6 +120,7 @@ public class JpaConfiguration {
 			LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
 		JpaTransactionManager tm = new JpaTransactionManager();
 		tm.setEntityManagerFactory(secondaryEntityManagerFactory.getObject());
+		logger.info("Initialized secondaryTransactionManager: {}", tm.getClass().getSimpleName());
 		return tm;
 	}
 
