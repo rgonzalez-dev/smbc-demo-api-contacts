@@ -14,15 +14,15 @@ import org.springframework.stereotype.Component;
  * correctly,
  * especially for Azure deployments with APPSETTING_ prefix.
  */
-@Component
+// @Component
 public class ConfigurationPropertiesLogger {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationPropertiesLogger.class);
 
-    @Autowired
+    // @Autowired
     private Environment environment;
 
-    @EventListener(ApplicationStartedEvent.class)
+    // @EventListener(ApplicationStartedEvent.class)
     public void logConfigurationProperties() {
         logger.info("\n" + "=".repeat(80));
         logger.info("CONFIGURATION PROPERTIES AT STARTUP");
