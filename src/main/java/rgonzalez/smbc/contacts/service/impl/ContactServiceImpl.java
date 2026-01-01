@@ -86,9 +86,16 @@ public class ContactServiceImpl implements ContactService {
     public Contact updateContact(Long id, Contact contact) {
         return contactRepository.findById(id)
                 .map(existingContact -> {
-                    existingContact.setName(contact.getName());
-                    // Update other fields as needed
-                    return contactRepository.save(existingContact);
+                    // Since Contact core fields are now immutable, we need to delete and recreate
+                    // or use a builder pattern. For now, we'll update the mutable audit fields
+                    Contact updatedContact = existingContact.toBuilder()
+                            .name(contact.getName())
+                            .emails(contact.getEmails())
+                            .phones(contact.getPhones())
+                            .build();
+                    updatedContact.setUpdatedBy("system");
+                    updatedContact.setUpdatedTimestamp(LocalDateTime.now());
+                    return contactRepository.save(updatedContact);
                 })
                 .orElseThrow(() -> new RuntimeException("Contact not found with id: " + id));
     }
