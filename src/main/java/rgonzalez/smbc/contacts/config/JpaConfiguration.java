@@ -157,27 +157,10 @@ public class JpaConfiguration {
 
 	private java.util.Properties jpaProperties() {
 		java.util.Properties props = new java.util.Properties();
-
-		// Auto-detect dialect based on driver class name if not explicitly set
-		String dialect = hibernateDialect;
-		if (dialect == null || dialect.isEmpty()) {
-			if (driverClassName.contains("h2")) {
-				dialect = "org.hibernate.dialect.H2Dialect";
-				logger.info("Auto-detected H2 dialect from driver class");
-			} else if (driverClassName.contains("postgresql")) {
-				dialect = "org.hibernate.dialect.PostgreSQLDialect";
-				logger.info("Auto-detected PostgreSQL dialect from driver class");
-			} else {
-				dialect = "org.hibernate.dialect.PostgreSQLDialect";
-				logger.warn("Unknown driver, defaulting to PostgreSQL dialect");
-			}
-		}
-
-		// props.setProperty("hibernate.dialect", dialect);
 		props.setProperty("hibernate.hbm2ddl.auto", "drop-and-create");
 		props.setProperty("hibernate.hbm2ddl.create_namespaces", "true");
 		props.setProperty("hibernate.show_sql", "true");
-		logger.info("JPA Properties - dialect: {}, ddl-auto: drop-and-create, create_namespaces: true", dialect);
+		logger.info("JPA Properties - show_sql: true, ddl-auto: drop-and-create, create_namespaces: true");
 		return props;
 	}
 }
