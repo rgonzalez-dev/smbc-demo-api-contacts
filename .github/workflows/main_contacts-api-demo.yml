@@ -73,6 +73,9 @@ jobs:
               SPRING_KAFKA_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
+              SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL="SASL_SSL" \
+              SPRING_KAFKA_PROPERTIES_SASL_MECHANISM="PLAIN" \
+              SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM="HTTPS"
               SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG="${{ secrets.KAFKA_SASL_CONFIG }}"
             
             az webapp config set --resource-group rgonzalez-group-demo --name contacts-api-demo \
