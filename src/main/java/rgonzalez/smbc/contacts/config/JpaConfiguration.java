@@ -15,6 +15,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.sql.Connection;
+import java.sql.Statement;
 
 @Configuration
 @Profile({ "mix2" })
@@ -22,6 +24,12 @@ import org.slf4j.LoggerFactory;
 public class JpaConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(JpaConfiguration.class);
+
+	@Value("${spring.datasource.driver-class-name:org.postgresql.Driver}")
+	private String driverClassName;
+
+	@Value("${spring.jpa.database-platform:}")
+	private String hibernateDialect;
 
 	@Value("${spring.datasource.url}")
 	private String datasourceUrl;
@@ -57,7 +65,23 @@ public class JpaConfiguration {
 		config.setMaxLifetime(1800000);
 		HikariDataSource dataSource = new HikariDataSource(config);
 		logger.info("Initialized primaryDataSource: {}", dataSource.getClass().getSimpleName());
+
+		// Create schema immediately for H2 before Hibernate tries to use it
+		if (driverClassName.contains("h2")) {
+			createSchemaIfNotExists(dataSource, "CONTACTS");
+		}
+
 		return dataSource;
+	}
+
+	private void createSchemaIfNotExists(DataSource dataSource, String schemaName) {
+		try (Connection conn = dataSource.getConnection();
+				Statement stmt = conn.createStatement()) {
+			stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schemaName);
+			logger.info("Created schema {} if not exists", schemaName);
+		} catch (Exception e) {
+			logger.warn("Error creating schema {}: {}", schemaName, e.getMessage());
+		}
 	}
 
 	@Bean
@@ -86,51 +110,74 @@ public class JpaConfiguration {
 
 	// SECONDARY DATASOURCE
 
-	@Bean
-	public DataSource secondaryDataSource() {
-		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl(secondaryDatasourceUrl);
-		config.setUsername(secondaryDatasourceUsername);
-		config.setPassword(secondaryDatasourcePassword);
-		config.setMaximumPoolSize(8);
-		config.setMinimumIdle(2);
-		config.setConnectionTimeout(30000);
-		config.setIdleTimeout(600000);
-		config.setMaxLifetime(1800000);
-		HikariDataSource dataSource = new HikariDataSource(config);
-		logger.info("Initialized secondaryDataSource: {}", dataSource.getClass().getSimpleName());
-		return dataSource;
-	}
+	// @Bean
+	// public DataSource secondaryDataSource() {
+	// HikariConfig config = new HikariConfig();
+	// config.setJdbcUrl(secondaryDatasourceUrl);
+	// config.setUsername(secondaryDatasourceUsername);
+	// config.setPassword(secondaryDatasourcePassword);
+	// config.setMaximumPoolSize(8);
+	// config.setMinimumIdle(2);
+	// config.setConnectionTimeout(30000);
+	// config.setIdleTimeout(600000);
+	// config.setMaxLifetime(1800000);
+	// HikariDataSource dataSource = new HikariDataSource(config);
+	// logger.info("Initialized secondaryDataSource: {}",
+	// dataSource.getClass().getSimpleName());
+	// return dataSource;
+	// }
 
-	@Bean
-	public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(DataSource secondaryDataSource) {
-		LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-		emf.setDataSource(secondaryDataSource);
-		emf.setPackagesToScan("rgonzalez.smbc.contacts.model");
-		emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-		emf.setJpaProperties(jpaProperties());
-		emf.setPersistenceUnitName("secondary");
-		logger.info("Initialized secondaryEntityManagerFactory: {} with persistence unit: secondary",
-				emf.getClass().getSimpleName());
-		return emf;
-	}
+	// @Bean
+	// public LocalContainerEntityManagerFactoryBean
+	// secondaryEntityManagerFactory(DataSource secondaryDataSource) {
+	// LocalContainerEntityManagerFactoryBean emf = new
+	// LocalContainerEntityManagerFactoryBean();
+	// emf.setDataSource(secondaryDataSource);
+	// emf.setPackagesToScan("rgonzalez.smbc.contacts.model");
+	// emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+	// emf.setJpaProperties(jpaProperties());
+	// emf.setPersistenceUnitName("secondary");
+	// logger.info("Initialized secondaryEntityManagerFactory: {} with persistence
+	// unit: secondary",
+	// emf.getClass().getSimpleName());
+	// return emf;
+	// }
 
-	@Bean
-	public PlatformTransactionManager secondaryTransactionManager(
-			LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
-		JpaTransactionManager tm = new JpaTransactionManager();
-		tm.setEntityManagerFactory(secondaryEntityManagerFactory.getObject());
-		logger.info("Initialized secondaryTransactionManager: {}", tm.getClass().getSimpleName());
-		return tm;
-	}
+	// @Bean
+	// public PlatformTransactionManager secondaryTransactionManager(
+	// LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
+	// JpaTransactionManager tm = new JpaTransactionManager();
+	// tm.setEntityManagerFactory(secondaryEntityManagerFactory.getObject());
+	// logger.info("Initialized secondaryTransactionManager: {}",
+	// tm.getClass().getSimpleName());
+	// return tm;
+	// }
 
 	// SHARED JPA PROPERTIES
 
 	private java.util.Properties jpaProperties() {
 		java.util.Properties props = new java.util.Properties();
-		props.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+
+		// Auto-detect dialect based on driver class name if not explicitly set
+		String dialect = hibernateDialect;
+		if (dialect == null || dialect.isEmpty()) {
+			if (driverClassName.contains("h2")) {
+				dialect = "org.hibernate.dialect.H2Dialect";
+				logger.info("Auto-detected H2 dialect from driver class");
+			} else if (driverClassName.contains("postgresql")) {
+				dialect = "org.hibernate.dialect.PostgreSQLDialect";
+				logger.info("Auto-detected PostgreSQL dialect from driver class");
+			} else {
+				dialect = "org.hibernate.dialect.PostgreSQLDialect";
+				logger.warn("Unknown driver, defaulting to PostgreSQL dialect");
+			}
+		}
+
+		// props.setProperty("hibernate.dialect", dialect);
 		props.setProperty("hibernate.hbm2ddl.auto", "drop-and-create");
-		props.setProperty("hibernate.show_sql", "false");
+		props.setProperty("hibernate.hbm2ddl.create_namespaces", "true");
+		props.setProperty("hibernate.show_sql", "true");
+		logger.info("JPA Properties - dialect: {}, ddl-auto: drop-and-create, create_namespaces: true", dialect);
 		return props;
 	}
 }

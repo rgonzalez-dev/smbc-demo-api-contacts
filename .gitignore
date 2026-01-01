@@ -33,3 +33,5 @@ build/
 .vscode/
 .env
 logs/
+LogFiles/Application/contacts-api-mix.log
+.env_h2

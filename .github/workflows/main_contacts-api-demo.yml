@@ -62,12 +62,14 @@ jobs:
             az webapp config appsettings set --resource-group rgonzalez-group-demo --name contacts-api-demo \
               --settings \
               SPRING_PROFILES_ACTIVE="mix2" \
-              SPRING_DATASOURCE_URL="jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data" \
-              SPRING_DATASOURCE_USERNAME="rgonzalez_admin" \
-              SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              SPRING_DATASOURCE_SECONDARY_URL="jdbc:postgresql://rgonzalez-db-interview.postgres.database.azure.com:5432/smbc_data" \
-              SPRING_DATASOURCE_SECONDARY_USERNAME="rgonzalez_admin" \
-              SPRING_DATASOURCE_SECONDARY_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              SPRING_DATASOURCE_URL="jdbc:h2:mem:smbc_data;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" \
+              SPRING_DATASOURCE_USERNAME="sa" \
+              SPRING_DATASOURCE_PASSWORD="" \
+              SPRING_DATASOURCE_DRIVER_CLASS_NAME="org.h2.Driver" \
+              SPRING_DATASOURCE_SECONDARY_URL="jdbc:h2:mem:smbc_data_secondary;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" \
+              SPRING_DATASOURCE_SECONDARY_USERNAME="sa" \
+              SPRING_DATASOURCE_SECONDARY_PASSWORD="" \
+              SPRING_DATASOURCE_SECONDARY_DRIVER_CLASS_NAME="org.h2.Driver" \
               SPRING_KAFKA_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
@@ -75,13 +77,6 @@ jobs:
             
             az webapp config set --resource-group rgonzalez-group-demo --name contacts-api-demo \
               --startup-file "java -Dspring.profiles.active=default,mix2 -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar"
-
-      # - name: Clear wwwroot folder
-      #   uses: azure/CLI@v2
-      #   with:
-      #     inlineScript: |
-      #       az webapp deployment slot config --resource-group rgonzalez-group-demo --name contacts-api-demo --slot Production --auto-swap true
-      #       az webapp up --resource-group rgonzalez-group-demo --name contacts-api-demo --os-type Linux || true
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
