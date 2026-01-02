@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -76,6 +78,28 @@ public class Contact {
         this.firstName = null;
         this.lastName = null;
         this.middleInitial = null;
+    }
+
+    @JsonCreator
+    public Contact(
+            @JsonProperty("name") String name,
+            @JsonProperty("ssn") String ssn,
+            @JsonProperty("firstName") String firstName,
+            @JsonProperty("lastName") String lastName,
+            @JsonProperty("middleInitial") String middleInitial,
+            @JsonProperty("createdBy") String createdBy,
+            @JsonProperty("createdTimestamp") LocalDateTime createdTimestamp,
+            @JsonProperty("updatedBy") String updatedBy,
+            @JsonProperty("updatedTimestamp") LocalDateTime updatedTimestamp) {
+        this.name = Objects.requireNonNull(name, "name cannot be null");
+        this.ssn = Objects.requireNonNull(ssn, "ssn cannot be null");
+        this.firstName = Objects.requireNonNull(firstName, "firstName cannot be null");
+        this.lastName = Objects.requireNonNull(lastName, "lastName cannot be null");
+        this.middleInitial = middleInitial;
+        this.createdBy = createdBy;
+        this.createdTimestamp = createdTimestamp;
+        this.updatedBy = updatedBy;
+        this.updatedTimestamp = updatedTimestamp;
     }
 
     public Contact(String name, String ssn, String firstName, String lastName, String middleInitial) {

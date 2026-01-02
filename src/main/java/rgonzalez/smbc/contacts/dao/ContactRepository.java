@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.repository;
+package rgonzalez.smbc.contacts.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

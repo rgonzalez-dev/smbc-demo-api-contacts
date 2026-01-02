@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.kafka;
+package rgonzalez.smbc.contacts.events;
 
 import java.time.LocalDateTime;
 
@@ -12,9 +12,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rgonzalez.smbc.contacts.config.KafkaConfig;
+import rgonzalez.smbc.contacts.dao.ContactRepository;
+import rgonzalez.smbc.contacts.dao.SsnVerificationResultRepository;
 import rgonzalez.smbc.contacts.model.SsnVerificationResult;
-import rgonzalez.smbc.contacts.repository.ContactRepository;
-import rgonzalez.smbc.contacts.repository.SsnVerificationResultRepository;
 
 /**
  * Kafka event handler for SSN verification results.

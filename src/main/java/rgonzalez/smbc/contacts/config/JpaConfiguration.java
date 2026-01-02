@@ -20,7 +20,7 @@ import java.sql.Statement;
 
 @Configuration
 @Profile({ "mix2" })
-@EnableJpaRepositories(basePackages = "rgonzalez.smbc.contacts.repository", entityManagerFactoryRef = "primaryEntityManagerFactory", transactionManagerRef = "primaryTransactionManager")
+@EnableJpaRepositories(basePackages = "rgonzalez.smbc.contacts.dao", entityManagerFactoryRef = "primaryEntityManagerFactory", transactionManagerRef = "primaryTransactionManager")
 public class JpaConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(JpaConfiguration.class);

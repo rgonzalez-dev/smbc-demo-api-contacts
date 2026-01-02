@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.aspect;
+package rgonzalez.smbc.contacts.logging;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -12,15 +12,15 @@ import java.util.Arrays;
 
 @Aspect
 @Component
-public class RestControllerLoggingAspect {
+public class ControllerLoggingAspect {
 
-    private static final Logger logger = LoggerFactory.getLogger(RestControllerLoggingAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(ControllerLoggingAspect.class);
 
     /**
-     * Pointcut that matches all public methods in classes annotated
-     * with @RestController
+     * Pointcut that matches all public methods in classes within the controller
+     * package
      */
-    @Pointcut("@within(org.springframework.web.bind.annotation.RestController) && execution(public * *(..))")
+    @Pointcut("within(rgonzalez.smbc.contacts.controller..*) && execution(public * *(..))")
     public void restControllerMethods() {
     }
 

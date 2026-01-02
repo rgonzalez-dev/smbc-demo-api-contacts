@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.dto;
+package rgonzalez.smbc.contacts.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -7,11 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import rgonzalez.smbc.contacts.config.KafkaTopicConfig;
+import rgonzalez.smbc.contacts.dao.BusinessEventRepository;
+import rgonzalez.smbc.contacts.dao.ContactRepository;
 import rgonzalez.smbc.contacts.model.BusinessEvent;
 import rgonzalez.smbc.contacts.model.Contact;
-
-import rgonzalez.smbc.contacts.repository.BusinessEventRepository;
-import rgonzalez.smbc.contacts.repository.ContactRepository;
 import rgonzalez.smbc.contacts.service.ContactService;
 
 import java.time.LocalDateTime;
