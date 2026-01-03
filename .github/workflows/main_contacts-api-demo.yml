@@ -77,7 +77,7 @@ jobs:
               SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL="SASL_SSL" \
               SPRING_KAFKA_PROPERTIES_SASL_MECHANISM="PLAIN" \
               SPRING_KAFKA_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM="HTTPS" \
-              SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG="${{ secrets.KAFKA_SASL_CONFIG }}"
+              SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG_PASSWORD="${{ secrets.KAFKA_SASL_CONFIG_PASSWORD }}"
             
             az webapp config set --resource-group rgonzalez-group-demo --name contacts-api-demo \
               --startup-file "java -Dspring.profiles.active=default,mix2 -jar /home/site/wwwroot/contacts-api-0.0.2-SNAPSHOT.jar"
