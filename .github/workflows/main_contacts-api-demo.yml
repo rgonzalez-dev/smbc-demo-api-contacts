@@ -70,6 +70,7 @@ jobs:
               SPRING_DATASOURCE_SECONDARY_USERNAME="sa" \
               SPRING_DATASOURCE_SECONDARY_PASSWORD="" \
               SPRING_DATASOURCE_SECONDARY_DRIVER_CLASS_NAME="org.h2.Driver" \
+              SPRING_JPA_DATABASE_PLATFORM="org.hibernate.dialect.H2Dialect" \
               SPRING_KAFKA_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
               SPRING_KAFKA_ADMIN_PROPERTIES_BOOTSTRAP_SERVERS="rgonzalez-messaging-interview.servicebus.windows.net:9093" \
