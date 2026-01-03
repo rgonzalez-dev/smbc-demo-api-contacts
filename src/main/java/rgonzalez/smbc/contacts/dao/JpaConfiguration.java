@@ -25,10 +25,10 @@ public class JpaConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(JpaConfiguration.class);
 
-	@Value("${spring.datasource.driver-class-name:org.postgresql.Driver}")
+	@Value("${spring.datasource.driver-class-name}")
 	private String driverClassName;
 
-	@Value("${spring.jpa.database-platform:}")
+	@Value("${spring.jpa.database-platform}")
 	private String hibernateDialect;
 
 	@Value("${spring.datasource.url}")
