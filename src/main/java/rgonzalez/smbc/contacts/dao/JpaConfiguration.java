@@ -110,48 +110,45 @@ public class JpaConfiguration {
 
 	// SECONDARY DATASOURCE
 
-	// @Bean
-	// public DataSource secondaryDataSource() {
-	// HikariConfig config = new HikariConfig();
-	// config.setJdbcUrl(secondaryDatasourceUrl);
-	// config.setUsername(secondaryDatasourceUsername);
-	// config.setPassword(secondaryDatasourcePassword);
-	// config.setMaximumPoolSize(8);
-	// config.setMinimumIdle(2);
-	// config.setConnectionTimeout(30000);
-	// config.setIdleTimeout(600000);
-	// config.setMaxLifetime(1800000);
-	// HikariDataSource dataSource = new HikariDataSource(config);
-	// logger.info("Initialized secondaryDataSource: {}",
-	// dataSource.getClass().getSimpleName());
-	// return dataSource;
-	// }
+	@Bean
+	public DataSource secondaryDataSource() {
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl(secondaryDatasourceUrl);
+		config.setUsername(secondaryDatasourceUsername);
+		config.setPassword(secondaryDatasourcePassword);
+		config.setMaximumPoolSize(8);
+		config.setMinimumIdle(2);
+		config.setConnectionTimeout(30000);
+		config.setIdleTimeout(600000);
+		config.setMaxLifetime(1800000);
+		HikariDataSource dataSource = new HikariDataSource(config);
+		logger.info("Initialized secondaryDataSource: {}",
+				dataSource.getClass().getSimpleName());
+		return dataSource;
+	}
 
-	// @Bean
-	// public LocalContainerEntityManagerFactoryBean
-	// secondaryEntityManagerFactory(DataSource secondaryDataSource) {
-	// LocalContainerEntityManagerFactoryBean emf = new
-	// LocalContainerEntityManagerFactoryBean();
-	// emf.setDataSource(secondaryDataSource);
-	// emf.setPackagesToScan("rgonzalez.smbc.contacts.model");
-	// emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-	// emf.setJpaProperties(jpaProperties());
-	// emf.setPersistenceUnitName("secondary");
-	// logger.info("Initialized secondaryEntityManagerFactory: {} with persistence
-	// unit: secondary",
-	// emf.getClass().getSimpleName());
-	// return emf;
-	// }
+	@Bean
+	public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(DataSource secondaryDataSource) {
+		LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
+		emf.setDataSource(secondaryDataSource);
+		emf.setPackagesToScan("rgonzalez.smbc.contacts.model");
+		emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+		emf.setJpaProperties(jpaProperties2nd());
+		emf.setPersistenceUnitName("secondary");
+		logger.info("Initialized secondaryEntityManagerFactory: {} with persistence	unit: secondary",
+				emf.getClass().getSimpleName());
+		return emf;
+	}
 
-	// @Bean
-	// public PlatformTransactionManager secondaryTransactionManager(
-	// LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
-	// JpaTransactionManager tm = new JpaTransactionManager();
-	// tm.setEntityManagerFactory(secondaryEntityManagerFactory.getObject());
-	// logger.info("Initialized secondaryTransactionManager: {}",
-	// tm.getClass().getSimpleName());
-	// return tm;
-	// }
+	@Bean
+	public PlatformTransactionManager secondaryTransactionManager(
+			LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
+		JpaTransactionManager tm = new JpaTransactionManager();
+		tm.setEntityManagerFactory(secondaryEntityManagerFactory.getObject());
+		logger.info("Initialized secondaryTransactionManager: {}",
+				tm.getClass().getSimpleName());
+		return tm;
+	}
 
 	// SHARED JPA PROPERTIES
 
@@ -161,6 +158,15 @@ public class JpaConfiguration {
 		props.setProperty("hibernate.hbm2ddl.create_namespaces", "true");
 		props.setProperty("hibernate.show_sql", "true");
 		logger.info("JPA Properties - show_sql: true, ddl-auto: drop-and-create, create_namespaces: true");
+		return props;
+	}
+
+	private java.util.Properties jpaProperties2nd() {
+		java.util.Properties props = new java.util.Properties();
+		props.setProperty("hibernate.hbm2ddl.auto", "validate");
+		props.setProperty("hibernate.hbm2ddl.create_namespaces", "false");
+		props.setProperty("hibernate.show_sql", "true");
+		logger.info("JPA Properties - show_sql: true, ddl-auto: validate, create_namespaces: false");
 		return props;
 	}
 }
