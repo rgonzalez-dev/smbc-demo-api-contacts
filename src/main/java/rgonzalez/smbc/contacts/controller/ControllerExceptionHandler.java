@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.errorhandler;
+package rgonzalez.smbc.contacts.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

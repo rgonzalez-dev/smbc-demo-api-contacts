@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.config;
+package rgonzalez.smbc.contacts.events;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;

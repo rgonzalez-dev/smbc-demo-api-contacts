@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.service.impl;
+package rgonzalez.smbc.contacts.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -6,12 +6,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import rgonzalez.smbc.contacts.config.KafkaTopicConfig;
 import rgonzalez.smbc.contacts.dao.BusinessEventRepository;
 import rgonzalez.smbc.contacts.dao.ContactRepository;
+import rgonzalez.smbc.contacts.events.KafkaTopicConfig;
 import rgonzalez.smbc.contacts.model.BusinessEvent;
 import rgonzalez.smbc.contacts.model.Contact;
-import rgonzalez.smbc.contacts.service.ContactService;
+import rgonzalez.smbc.contacts.model.system.BusinessActivity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,30 +38,31 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     @Transactional
+    @BusinessActivity(lineOfBusiness = "SMBC - Mortgage Lending", activityName = "CreateContact", eventName = "ContactCreated", isAuditable = true, isOnlyAnInquiry = false)
     public Contact createContact(Contact contact) {
         // Save the contact
         Contact savedContact = contactRepository.save(contact);
 
         // Create a BusinessEvent for this contact creation
         try {
-            String eventPayload = objectMapper.writeValueAsString(savedContact);
-            BusinessEvent businessEvent = new BusinessEvent(
-                    UUID.randomUUID().toString(),
-                    savedContact.getId().toString(),
-                    "Contact",
-                    "ContactCreated",
-                    eventPayload,
-                    "contact-created-v1", null,
-                    BusinessEvent.EventDirection.OUTBOUND);
-            businessEvent.setCreatedBy("system"); // Set createdBy if needed
-            businessEvent.setUpdatedBy("system"); // Set updatedBy if needed
-            businessEvent.setUpdatedTimestamp(LocalDateTime.now());
+            // String eventPayload = objectMapper.writeValueAsString(savedContact);
+            // BusinessEvent businessEvent = new BusinessEvent(
+            // UUID.randomUUID().toString(),
+            // savedContact.getId().toString(),
+            // "Contact",
+            // "ContactCreated",
+            // eventPayload,
+            // "contact-created-v1", null,
+            // BusinessEvent.EventDirection.OUTBOUND);
+            // businessEvent.setCreatedBy("system"); // Set createdBy if needed
+            // businessEvent.setUpdatedBy("system"); // Set updatedBy if needed
+            // businessEvent.setUpdatedTimestamp(LocalDateTime.now());
             // Persist the event to database
-            businessEventRepository.save(businessEvent);
+            // businessEventRepository.save(businessEvent);
 
             // Send the event to Kafka with aggregate id as the message key
-            businessEventKafkaTemplate.send(KafkaTopicConfig.CONTACTS_TOPIC,
-                    businessEvent.getAggregateId(), businessEvent);
+            // businessEventKafkaTemplate.send(KafkaTopicConfig.CONTACTS_TOPIC,
+            // businessEvent.getAggregateId(), businessEvent);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create business event for contact", e);
         }

@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.config;
+package rgonzalez.smbc.contacts.events;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

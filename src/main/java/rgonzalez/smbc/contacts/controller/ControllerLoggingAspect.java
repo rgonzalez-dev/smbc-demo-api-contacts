@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.logging;
+package rgonzalez.smbc.contacts.controller;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.config;
+package rgonzalez.smbc.contacts.events;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -21,5 +21,6 @@ import org.springframework.context.annotation.Import;
 public class KafkaConfig {
 
     // Topic constants are available through KafkaTopicConfig
-    public static final String CUSTOMER_SSN_VERIFIED_TOPIC = KafkaTopicConfig.CUSTOMER_SSN_VERIFIED_TOPIC;
+    // public static final String CUSTOMER_SSN_VERIFIED_TOPIC =
+    // KafkaTopicConfig.CUSTOMER_SSN_VERIFIED_TOPIC;
 }

@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.logging;
+package rgonzalez.smbc.contacts.service;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -17,7 +17,8 @@ public class ServiceLoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(ServiceLoggingAspect.class);
 
     /**
-     * Pointcut that matches all public methods in classes within the service package
+     * Pointcut that matches all public methods in classes within the service
+     * package
      */
     @Pointcut("within(rgonzalez.smbc.contacts.service..*) && execution(public * *(..))")
     public void serviceMethods() {

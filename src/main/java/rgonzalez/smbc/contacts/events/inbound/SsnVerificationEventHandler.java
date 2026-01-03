@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.events;
+package rgonzalez.smbc.contacts.events.inbound;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +11,10 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rgonzalez.smbc.contacts.config.KafkaConfig;
+
 import rgonzalez.smbc.contacts.dao.ContactRepository;
 import rgonzalez.smbc.contacts.dao.SsnVerificationResultRepository;
+import rgonzalez.smbc.contacts.events.KafkaTopicConfig;
 import rgonzalez.smbc.contacts.model.SsnVerificationResult;
 
 /**
@@ -47,7 +48,7 @@ public class SsnVerificationEventHandler {
      * @param offset             The offset of this message
      * @param acknowledgment     Manual acknowledgment handler
      */
-    @KafkaListener(topics = KafkaConfig.CUSTOMER_SSN_VERIFIED_TOPIC, containerFactory = "ssnVerificationKafkaListenerContainerFactory", groupId = "contacts-service")
+    @KafkaListener(topics = KafkaTopicConfig.CUSTOMER_SSN_VERIFIED_TOPIC, containerFactory = "ssnVerificationKafkaListenerContainerFactory", groupId = "contacts-service")
     @Transactional
     public void handleSsnVerificationEvent(
             @Payload SsnVerificationResult verificationResult,

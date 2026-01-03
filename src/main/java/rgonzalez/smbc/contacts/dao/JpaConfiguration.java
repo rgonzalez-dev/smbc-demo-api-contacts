@@ -1,4 +1,4 @@
-package rgonzalez.smbc.contacts.config;
+package rgonzalez.smbc.contacts.dao;
 
 import javax.sql.DataSource;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
