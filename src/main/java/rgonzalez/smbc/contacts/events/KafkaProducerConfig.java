@@ -34,6 +34,13 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
         // Don't include type headers for BusinessEvent since integration-api expects
         // its own type
+        String config1 = new StringBuilder()
+                .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
+                .append("username=\"$ConnectionString\" ")
+                .append(kafkaProperties.getProperties().get("spring.kafka.properties.sasl.jaas.config.password"))
+                .toString();
+        configProps.put("kafka.sasl.jaas.config", config1);
+
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
