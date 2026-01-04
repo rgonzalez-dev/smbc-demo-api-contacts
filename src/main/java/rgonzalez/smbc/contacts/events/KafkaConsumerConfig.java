@@ -2,6 +2,8 @@ package rgonzalez.smbc.contacts.events;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +11,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
@@ -23,6 +24,7 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class KafkaConsumerConfig {
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerConfig.class);
 
     /**
      * Consumer Factory for SSN verification results
@@ -59,13 +61,15 @@ public class KafkaConsumerConfig {
         // Note: max.in.flight.requests is a producer-only property
         // Consumer ordering is guaranteed by concurrency=1 and
         // MAX_POLL_RECORDS_CONFIG=1
-        String config1 = new StringBuilder()
-                .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
-                .append("username=\"$ConnectionString\" password=\"")
-                .append(kafkaProperties.getProperties().get("sasl.jaas.config.password"))
-                .append("\";")
-                .toString();
-        configProps.put("kafka.sasl.jaas.config", config1);
+        // String config1 = new StringBuilder()
+        // .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
+        // .append("username=\"$ConnectionString\" password=\"")
+        // .append(kafkaProperties.getProperties().get("sasl.jaas.config.password"))
+        // .append("\";")
+        // .toString();
+        // configProps.put("kafka.sasl.jaas.config", config1);
+
+        logger.debug("Kafka Consumer configProps: {}", configProps);
 
         return new DefaultKafkaConsumerFactory<>(configProps);
     }

@@ -2,6 +2,8 @@ package rgonzalez.smbc.contacts.events;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +19,7 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfig {
+    private static final Logger logger = LoggerFactory.getLogger(KafkaProducerConfig.class);
 
     @Value(value = "${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
@@ -34,13 +37,15 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
         // Don't include type headers for BusinessEvent since integration-api expects
         // its own type
-        String config1 = new StringBuilder()
-                .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
-                .append("username=\"$ConnectionString\" password=\"")
-                .append(kafkaProperties.getProperties().get("sasl.jaas.config.password"))
-                .append("\";")
-                .toString();
-        configProps.put("kafka.sasl.jaas.config", config1);
+        // String config1 = new StringBuilder()
+        // .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
+        // .append("username=\"$ConnectionString\" password=\"")
+        // .append(kafkaProperties.getProperties().get("sasl.jaas.config.password"))
+        // .append("\";")
+        // .toString();
+        // configProps.put("kafka.sasl.jaas.config", config1);
+
+        logger.debug("Kafka producer configProps: {}", configProps);
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
