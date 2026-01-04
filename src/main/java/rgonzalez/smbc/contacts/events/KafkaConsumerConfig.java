@@ -9,6 +9,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
@@ -58,6 +59,13 @@ public class KafkaConsumerConfig {
         // Note: max.in.flight.requests is a producer-only property
         // Consumer ordering is guaranteed by concurrency=1 and
         // MAX_POLL_RECORDS_CONFIG=1
+        String config1 = new StringBuilder()
+                .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
+                .append("username=\"$ConnectionString\" ")
+                .append(kafkaProperties.getProperties().get("spring.kafka.properties.sasl.jaas.config.password"))
+                .toString();
+        configProps.put("kafka.sasl.jaas.config", config1);
+
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
