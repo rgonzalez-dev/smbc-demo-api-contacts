@@ -61,8 +61,9 @@ public class KafkaConsumerConfig {
         // MAX_POLL_RECORDS_CONFIG=1
         String config1 = new StringBuilder()
                 .append("org.apache.kafka.common.security.plain.PlainLoginModule required ")
-                .append("username=\"$ConnectionString\" ")
-                .append(kafkaProperties.getProperties().get("spring.kafka.properties.sasl.jaas.config.password"))
+                .append("username=\"$ConnectionString\" password=\"")
+                .append(kafkaProperties.getProperties().get("sasl.jaas.config.password"))
+                .append("\";")
                 .toString();
         configProps.put("kafka.sasl.jaas.config", config1);
 
