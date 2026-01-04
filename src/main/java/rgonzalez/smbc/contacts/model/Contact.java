@@ -1,10 +1,6 @@
 package rgonzalez.smbc.contacts.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,21 +39,8 @@ public class Contact {
     @Column(nullable = false, length = 20)
     private String ssnVerificationStatus = "not-verified";
 
-    @CreatedBy
-    @Column(nullable = false, updatable = false, length = 100)
-    private String createdBy;
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdTimestamp;
-
-    @LastModifiedBy
-    @Column(nullable = false, length = 100)
-    private String updatedBy;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedTimestamp;
+    @Embedded
+    private Traceable traceable = new Traceable();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -96,10 +79,7 @@ public class Contact {
         this.firstName = Objects.requireNonNull(firstName, "firstName cannot be null");
         this.lastName = Objects.requireNonNull(lastName, "lastName cannot be null");
         this.middleInitial = middleInitial;
-        this.createdBy = createdBy;
-        this.createdTimestamp = createdTimestamp;
-        this.updatedBy = updatedBy;
-        this.updatedTimestamp = updatedTimestamp;
+        this.traceable = new Traceable(createdBy, createdTimestamp, updatedBy, updatedTimestamp);
     }
 
     public Contact(String name, String ssn, String firstName, String lastName, String middleInitial) {
@@ -108,6 +88,7 @@ public class Contact {
         this.firstName = Objects.requireNonNull(firstName, "firstName cannot be null");
         this.lastName = Objects.requireNonNull(lastName, "lastName cannot be null");
         this.middleInitial = middleInitial;
+        this.traceable = new Traceable();
     }
 
     /**
@@ -121,10 +102,7 @@ public class Contact {
         this.lastName = other.lastName;
         this.middleInitial = other.middleInitial;
         this.ssnVerificationStatus = other.ssnVerificationStatus;
-        this.createdBy = other.createdBy;
-        this.createdTimestamp = other.createdTimestamp;
-        this.updatedBy = other.updatedBy;
-        this.updatedTimestamp = other.updatedTimestamp;
+        this.traceable = new Traceable(other.traceable);
         // Defensive copy of collections
         this.phones = new HashSet<>(other.phones);
         this.emails = new HashSet<>(other.emails);
@@ -169,35 +147,43 @@ public class Contact {
     }
 
     public String getCreatedBy() {
-        return createdBy;
+        return traceable.getCreatedBy();
     }
 
     public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+        traceable.setCreatedBy(createdBy);
     }
 
     public LocalDateTime getCreatedTimestamp() {
-        return createdTimestamp;
+        return traceable.getCreatedTimestamp();
     }
 
     public void setCreatedTimestamp(LocalDateTime createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
+        traceable.setCreatedTimestamp(createdTimestamp);
     }
 
     public String getUpdatedBy() {
-        return updatedBy;
+        return traceable.getUpdatedBy();
     }
 
     public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+        traceable.setUpdatedBy(updatedBy);
     }
 
     public LocalDateTime getUpdatedTimestamp() {
-        return updatedTimestamp;
+        return traceable.getUpdatedTimestamp();
     }
 
     public void setUpdatedTimestamp(LocalDateTime updatedTimestamp) {
-        this.updatedTimestamp = updatedTimestamp;
+        traceable.setUpdatedTimestamp(updatedTimestamp);
+    }
+
+    public Traceable getTraceable() {
+        return traceable;
+    }
+
+    public void setTraceable(Traceable traceable) {
+        this.traceable = traceable != null ? traceable : new Traceable();
     }
 
     public Set<Phone> getPhones() {
@@ -304,10 +290,7 @@ public class Contact {
         private String lastName;
         private String middleInitial;
         private String ssnVerificationStatus = "not-verified";
-        private String createdBy;
-        private LocalDateTime createdTimestamp;
-        private String updatedBy;
-        private LocalDateTime updatedTimestamp;
+        private Traceable traceable = new Traceable();
         private Set<Phone> phones = new HashSet<>();
         private Set<Email> emails = new HashSet<>();
         private Set<Address> addresses = new HashSet<>();
@@ -326,10 +309,7 @@ public class Contact {
             this.lastName = contact.lastName;
             this.middleInitial = contact.middleInitial;
             this.ssnVerificationStatus = contact.ssnVerificationStatus;
-            this.createdBy = contact.createdBy;
-            this.createdTimestamp = contact.createdTimestamp;
-            this.updatedBy = contact.updatedBy;
-            this.updatedTimestamp = contact.updatedTimestamp;
+            this.traceable = new Traceable(contact.traceable);
             this.phones = new HashSet<>(contact.phones);
             this.emails = new HashSet<>(contact.emails);
             this.addresses = new HashSet<>(contact.addresses);
@@ -371,22 +351,27 @@ public class Contact {
         }
 
         public Builder createdBy(String createdBy) {
-            this.createdBy = createdBy;
+            this.traceable.setCreatedBy(createdBy);
             return this;
         }
 
         public Builder createdTimestamp(LocalDateTime createdTimestamp) {
-            this.createdTimestamp = createdTimestamp;
+            this.traceable.setCreatedTimestamp(createdTimestamp);
             return this;
         }
 
         public Builder updatedBy(String updatedBy) {
-            this.updatedBy = updatedBy;
+            this.traceable.setUpdatedBy(updatedBy);
             return this;
         }
 
         public Builder updatedTimestamp(LocalDateTime updatedTimestamp) {
-            this.updatedTimestamp = updatedTimestamp;
+            this.traceable.setUpdatedTimestamp(updatedTimestamp);
+            return this;
+        }
+
+        public Builder traceable(Traceable traceable) {
+            this.traceable = traceable != null ? traceable : new Traceable();
             return this;
         }
 
@@ -421,10 +406,7 @@ public class Contact {
 
             contact.id = this.id;
             contact.ssnVerificationStatus = this.ssnVerificationStatus;
-            contact.createdBy = this.createdBy;
-            contact.createdTimestamp = this.createdTimestamp;
-            contact.updatedBy = this.updatedBy;
-            contact.updatedTimestamp = this.updatedTimestamp;
+            contact.traceable = new Traceable(this.traceable);
             contact.phones = new HashSet<>(this.phones);
             contact.emails = new HashSet<>(this.emails);
             contact.addresses = new HashSet<>(this.addresses);

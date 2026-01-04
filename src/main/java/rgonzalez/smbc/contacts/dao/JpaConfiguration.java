@@ -7,19 +7,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Optional;
 
 @Configuration
 @Profile({ "mix2" })
+@EnableJpaAuditing
 @EnableJpaRepositories(basePackages = "rgonzalez.smbc.contacts.dao", entityManagerFactoryRef = "primaryEntityManagerFactory", transactionManagerRef = "primaryTransactionManager")
 public class JpaConfiguration {
 
@@ -168,5 +174,21 @@ public class JpaConfiguration {
 		props.setProperty("hibernate.show_sql", "true");
 		logger.info("JPA Properties - show_sql: true, ddl-auto: validate, create_namespaces: false");
 		return props;
+	}
+
+	/**
+	 * Provides the current auditor (user) for @CreatedBy and @LastModifiedBy
+	 * annotations. Falls back to "SYSTEM_USER" if no authenticated user is found.
+	 */
+	@Bean
+	public AuditorAware<String> auditorAware() {
+		return () -> {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			if (authentication != null && authentication.isAuthenticated()
+					&& !authentication.getPrincipal().equals("anonymousUser")) {
+				return Optional.of(authentication.getName());
+			}
+			return Optional.of("SYSTEM_USER");
+		};
 	}
 }

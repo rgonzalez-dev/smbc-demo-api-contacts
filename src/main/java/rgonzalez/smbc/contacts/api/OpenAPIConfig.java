@@ -45,11 +45,14 @@ public class OpenAPIConfig {
                                                                 .url("https://github.com/yourusername/contacts-api")))
                                 .servers(Arrays.asList(
                                                 new Server()
-                                                                .url("http://localhost:8080")
-                                                                .description("Development Server"),
+                                                                .url("https://smbc-api-demo.azure-api.net/api/api/v1/contacts")
+                                                                .description("APIM gateway -> Azure Web App"),
                                                 new Server()
-                                                                .url("https://contacts-api-demo.azurewebsites.net")
-                                                                .description("Production Server - Azure Web App")))
+                                                                .url("https://contacts-api-demo-h8cgeuapd7gcd4d4.eastus-01.azurewebsites.net")
+                                                                .description("Azure Web App Directly"),
+                                                new Server()
+                                                                .url("http://localhost:8080")
+                                                                .description("Development Server")))
                                 .tags(Arrays.asList(
                                                 new Tag()
                                                                 .name("Contact Management")
