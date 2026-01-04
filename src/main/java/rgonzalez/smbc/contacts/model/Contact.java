@@ -12,13 +12,19 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
-@Table(name = "contacts", schema = "contacts")
+@Table(name = "contacts", schema = "contacts", indexes = {
+        @Index(name = "idx_ssn", columnList = "ssn", unique = true),
+        @Index(name = "idx_name", columnList = "name")
+})
 @EntityListeners(AuditingEntityListener.class)
 public class Contact {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    private Long version;
 
     @Column(nullable = false, length = 255)
     private final String name;
@@ -40,19 +46,20 @@ public class Contact {
     private String ssnVerificationStatus = "not-verified";
 
     @Embedded
+    @JsonIgnore(false)
     private Traceable traceable = new Traceable();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<Phone> phones = new HashSet<>();
+    private List<Phone> phones = new ArrayList<>();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<Email> emails = new HashSet<>();
+    private List<Email> emails = new ArrayList<>();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Set<Address> addresses = new HashSet<>();
+    private List<Address> addresses = new ArrayList<>();
 
     // Constructors
     public Contact() {
@@ -104,9 +111,9 @@ public class Contact {
         this.ssnVerificationStatus = other.ssnVerificationStatus;
         this.traceable = new Traceable(other.traceable);
         // Defensive copy of collections
-        this.phones = new HashSet<>(other.phones);
-        this.emails = new HashSet<>(other.emails);
-        this.addresses = new HashSet<>(other.addresses);
+        this.phones = new ArrayList<>(other.phones);
+        this.emails = new ArrayList<>(other.emails);
+        this.addresses = new ArrayList<>(other.addresses);
     }
 
     // Getters and Setters
@@ -116,6 +123,14 @@ public class Contact {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getName() {
@@ -146,38 +161,6 @@ public class Contact {
         this.ssnVerificationStatus = ssnVerificationStatus;
     }
 
-    public String getCreatedBy() {
-        return traceable.getCreatedBy();
-    }
-
-    public void setCreatedBy(String createdBy) {
-        traceable.setCreatedBy(createdBy);
-    }
-
-    public LocalDateTime getCreatedTimestamp() {
-        return traceable.getCreatedTimestamp();
-    }
-
-    public void setCreatedTimestamp(LocalDateTime createdTimestamp) {
-        traceable.setCreatedTimestamp(createdTimestamp);
-    }
-
-    public String getUpdatedBy() {
-        return traceable.getUpdatedBy();
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        traceable.setUpdatedBy(updatedBy);
-    }
-
-    public LocalDateTime getUpdatedTimestamp() {
-        return traceable.getUpdatedTimestamp();
-    }
-
-    public void setUpdatedTimestamp(LocalDateTime updatedTimestamp) {
-        traceable.setUpdatedTimestamp(updatedTimestamp);
-    }
-
     public Traceable getTraceable() {
         return traceable;
     }
@@ -186,27 +169,27 @@ public class Contact {
         this.traceable = traceable != null ? traceable : new Traceable();
     }
 
-    public Set<Phone> getPhones() {
-        return Collections.unmodifiableSet(phones);
+    public List<Phone> getPhones() {
+        return Collections.unmodifiableList(phones);
     }
 
-    public void setPhones(Set<Phone> phones) {
+    public void setPhones(List<Phone> phones) {
         this.phones = phones;
     }
 
-    public Set<Email> getEmails() {
-        return Collections.unmodifiableSet(emails);
+    public List<Email> getEmails() {
+        return Collections.unmodifiableList(emails);
     }
 
-    public void setEmails(Set<Email> emails) {
+    public void setEmails(List<Email> emails) {
         this.emails = emails;
     }
 
-    public Set<Address> getAddresses() {
-        return Collections.unmodifiableSet(addresses);
+    public List<Address> getAddresses() {
+        return Collections.unmodifiableList(addresses);
     }
 
-    public void setAddresses(Set<Address> addresses) {
+    public void setAddresses(List<Address> addresses) {
         this.addresses = addresses;
     }
 
@@ -291,9 +274,9 @@ public class Contact {
         private String middleInitial;
         private String ssnVerificationStatus = "not-verified";
         private Traceable traceable = new Traceable();
-        private Set<Phone> phones = new HashSet<>();
-        private Set<Email> emails = new HashSet<>();
-        private Set<Address> addresses = new HashSet<>();
+        private List<Phone> phones = new ArrayList<>();
+        private List<Email> emails = new ArrayList<>();
+        private List<Address> addresses = new ArrayList<>();
 
         public Builder() {
         }
@@ -310,9 +293,9 @@ public class Contact {
             this.middleInitial = contact.middleInitial;
             this.ssnVerificationStatus = contact.ssnVerificationStatus;
             this.traceable = new Traceable(contact.traceable);
-            this.phones = new HashSet<>(contact.phones);
-            this.emails = new HashSet<>(contact.emails);
-            this.addresses = new HashSet<>(contact.addresses);
+            this.phones = new ArrayList<>(contact.phones);
+            this.emails = new ArrayList<>(contact.emails);
+            this.addresses = new ArrayList<>(contact.addresses);
         }
 
         public Builder id(Long id) {
@@ -375,17 +358,17 @@ public class Contact {
             return this;
         }
 
-        public Builder phones(Set<Phone> phones) {
+        public Builder phones(List<Phone> phones) {
             this.phones = phones;
             return this;
         }
 
-        public Builder emails(Set<Email> emails) {
+        public Builder emails(List<Email> emails) {
             this.emails = emails;
             return this;
         }
 
-        public Builder addresses(Set<Address> addresses) {
+        public Builder addresses(List<Address> addresses) {
             this.addresses = addresses;
             return this;
         }
@@ -407,9 +390,9 @@ public class Contact {
             contact.id = this.id;
             contact.ssnVerificationStatus = this.ssnVerificationStatus;
             contact.traceable = new Traceable(this.traceable);
-            contact.phones = new HashSet<>(this.phones);
-            contact.emails = new HashSet<>(this.emails);
-            contact.addresses = new HashSet<>(this.addresses);
+            contact.phones = new ArrayList<>(this.phones);
+            contact.emails = new ArrayList<>(this.emails);
+            contact.addresses = new ArrayList<>(this.addresses);
 
             return contact;
         }

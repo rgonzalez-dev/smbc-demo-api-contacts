@@ -93,8 +93,6 @@ public class ContactServiceImpl implements ContactService {
                             .emails(contact.getEmails())
                             .phones(contact.getPhones())
                             .build();
-                    updatedContact.setUpdatedBy("system");
-                    updatedContact.setUpdatedTimestamp(LocalDateTime.now());
                     return contactRepository.save(updatedContact);
                 })
                 .orElseThrow(() -> new RuntimeException("Contact not found with id: " + id));
