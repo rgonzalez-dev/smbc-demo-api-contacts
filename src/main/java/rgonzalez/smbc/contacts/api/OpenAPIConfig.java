@@ -45,7 +45,7 @@ public class OpenAPIConfig {
                                                                 .url("https://github.com/yourusername/contacts-api")))
                                 .servers(Arrays.asList(
                                                 new Server()
-                                                                .url("https://smbc-api-demo.azure-api.net/api/api/v1/contacts")
+                                                                .url("https://smbc-api-demo.azure-api.net/api")
                                                                 .description("APIM gateway -> Azure Web App"),
                                                 new Server()
                                                                 .url("https://contacts-api-demo-h8cgeuapd7gcd4d4.eastus-01.azurewebsites.net")
