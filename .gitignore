@@ -35,3 +35,4 @@ build/
 logs/
 LogFiles/Application/contacts-api-mix.log
 .env_h2
+.env_sqlserver

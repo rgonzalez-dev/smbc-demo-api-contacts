@@ -1,9 +1,11 @@
 package rgonzalez.smbc.contacts.model;
 
 import jakarta.persistence.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "phones", schema = "contacts")
+@EntityListeners(AuditingEntityListener.class)
 public class Phone {
 
     @Id
@@ -20,6 +22,9 @@ public class Phone {
     @JoinColumn(name = "contact_id", nullable = false)
     private Contact contact;
 
+    @Embedded
+    private Traceable traceable = new Traceable();
+
     // Constructors
     public Phone() {
     }
@@ -27,6 +32,7 @@ public class Phone {
     public Phone(String phoneNumber, String phoneType) {
         this.phoneNumber = phoneNumber;
         this.phoneType = phoneType;
+        this.traceable = new Traceable();
     }
 
     // Getters and Setters
@@ -60,5 +66,13 @@ public class Phone {
 
     public void setContact(Contact contact) {
         this.contact = contact;
+    }
+
+    public Traceable getTraceable() {
+        return traceable;
+    }
+
+    public void setTraceable(Traceable traceable) {
+        this.traceable = traceable != null ? traceable : new Traceable();
     }
 }

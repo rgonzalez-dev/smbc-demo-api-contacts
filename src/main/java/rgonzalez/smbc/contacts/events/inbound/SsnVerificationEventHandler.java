@@ -16,6 +16,7 @@ import rgonzalez.smbc.contacts.dao.ContactRepository;
 import rgonzalez.smbc.contacts.dao.SsnVerificationResultRepository;
 import rgonzalez.smbc.contacts.events.KafkaTopicConfig;
 import rgonzalez.smbc.contacts.model.SsnVerificationResult;
+import rgonzalez.smbc.contacts.model.Traceable;
 
 /**
  * Kafka event handler for SSN verification results.
@@ -66,9 +67,8 @@ public class SsnVerificationEventHandler {
             // Persist the verification result to database
             // Clear the ID to ensure it's treated as a new record
             verificationResult.setId(null);
-            verificationResult.setCreatedBy("system");
-            verificationResult.setUpdatedBy("system");
-            verificationResult.setUpdatedTimestamp(LocalDateTime.now());
+            Traceable traceable = new Traceable("system", LocalDateTime.now(), "system", LocalDateTime.now());
+            verificationResult.setTraceable(traceable);
             SsnVerificationResult persistedResult = ssnVerificationResultRepository.save(verificationResult);
             logger.debug("SSN verification result persisted to database with id [{}]", persistedResult.getId());
 

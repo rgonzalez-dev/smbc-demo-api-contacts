@@ -28,7 +28,7 @@ public interface SsnVerificationResultRepository extends JpaRepository<SsnVerifi
      * @param contactId the contact ID
      * @return the most recent verification result, or null if none found
      */
-    SsnVerificationResult findFirstByContactIdOrderByCreatedTimestampDesc(String contactId);
+    SsnVerificationResult findFirstByContactIdOrderByTraceableCreatedTimestampDesc(String contactId);
 
     /**
      * Find verification results by status.

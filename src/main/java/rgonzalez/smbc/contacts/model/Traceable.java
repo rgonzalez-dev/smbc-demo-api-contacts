@@ -1,16 +1,12 @@
 package rgonzalez.smbc.contacts.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
 /**
  * Traceable embeddable class that contains audit trail information for
@@ -29,16 +25,14 @@ public class Traceable {
     @Column(nullable = false, updatable = false, length = 100)
     private String createdBy;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, insertable = false, columnDefinition = "DATETIME2 DEFAULT SYSDATETIME()")
     private LocalDateTime createdTimestamp;
 
     @LastModifiedBy
     @Column(nullable = false, length = 100)
     private String updatedBy;
 
-    @LastModifiedDate
-    @Column(nullable = false)
+    @Column(nullable = false, insertable = false, columnDefinition = "DATETIME2 DEFAULT SYSDATETIME()")
     private LocalDateTime updatedTimestamp;
 
     // Constructors

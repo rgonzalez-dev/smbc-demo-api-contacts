@@ -9,13 +9,14 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import rgonzalez.smbc.contacts.dao.BusinessEventRepository;
 import rgonzalez.smbc.contacts.model.BusinessEvent;
 import rgonzalez.smbc.contacts.model.system.BusinessActivity;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -59,28 +60,22 @@ public class BusinessActivityRecorder {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
 
-        logger.info("Recording Business Activity - Class: {}, Method: {}, Parameters: {}", className, methodName,
-                Arrays.toString(args));
-        long startTime = System.currentTimeMillis();
-
         try {
+            logger.info("Recording Business Activity - Class: {}, Method: {}, Parameters: {}",
+                    className, methodName, Arrays.toString(args));
+
             Object result = joinPoint.proceed();
 
             if (businessActivity.isAuditable()) {
-                logger.info("Auditable Business Activity - Class: {}, Method: {}, Activity Type: {}",
-                        className, methodName, businessActivity.lineOfBusiness(), businessActivity.activityName());
-                long executionTime = System.currentTimeMillis() - startTime;
-                logger.info("Business Activity Completed - Class: {}, Method: {}, Execution Time: {}ms",
-                        className, methodName, executionTime);
                 // Create and persist the business event
                 createAndPublishBusinessEvent(result, businessActivity);
             }
 
             return result;
         } catch (Throwable throwable) {
-            long executionTime = System.currentTimeMillis() - startTime;
-            logger.error("Business Activity Failed - Class: {}, Method: {}, Execution Time: {}ms, Error: {}",
-                    className, methodName, executionTime, throwable.getMessage(), throwable);
+
+            logger.error("Business Activity Failed - Class: {}, Method: {}, Error: {}",
+                    className, methodName, throwable.getMessage(), throwable);
             throw throwable;
         }
     }
@@ -112,10 +107,6 @@ public class BusinessActivityRecorder {
                     schema,
                     null,
                     BusinessEvent.EventDirection.OUTBOUND);
-
-            businessEvent.setCreatedBy("system");
-            businessEvent.setUpdatedBy("system");
-            businessEvent.setUpdatedTimestamp(LocalDateTime.now());
 
             // Persist the event to database
             businessEventRepository.save(businessEvent);
@@ -163,4 +154,19 @@ public class BusinessActivityRecorder {
         return (aggregateName.toLowerCase() + "-" + eventName.toLowerCase()).replaceAll("([a-z])([A-Z])", "$1-$2")
                 .toLowerCase();
     }
+
+    /**
+     * Retrieves the current authenticated username from Spring Security context
+     * 
+     * @return the username of the authenticated user, or "SYSTEM" if no user is
+     *         authenticated
+     */
+    // private String getCurrentUsername() {
+    // Authentication authentication =
+    // SecurityContextHolder.getContext().getAuthentication();
+    // if (authentication != null && authentication.isAuthenticated()) {
+    // return authentication.getName();
+    // }
+    // return "SYSTEM";
+    // }
 }

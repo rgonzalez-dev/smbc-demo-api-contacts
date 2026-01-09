@@ -41,6 +41,8 @@ public class ContactServiceImpl implements ContactService {
     @BusinessActivity(lineOfBusiness = "SMBC - Mortgage Lending", activityName = "CreateContact", eventName = "ContactCreated", isAuditable = true, isOnlyAnInquiry = false)
     public Contact createContact(Contact contact) {
         // Save the contact
+        // contact.getTraceable().setUpdatedBy("SYSTEM");
+        // contact.getTraceable().setCreatedBy("SYSTEM");
         Contact savedContact = contactRepository.save(contact);
 
         // Create a BusinessEvent for this contact creation

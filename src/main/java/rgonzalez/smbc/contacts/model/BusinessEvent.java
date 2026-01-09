@@ -1,13 +1,7 @@
 package rgonzalez.smbc.contacts.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "business_events", schema = "contacts")
@@ -34,7 +28,7 @@ public class BusinessEvent {
     private String eventPayload;
 
     @Column(nullable = false, length = 500)
-    private String schema;
+    private String schemaVersion;
 
     @Column(nullable = true, length = 100)
     private String correlationId;
@@ -43,21 +37,8 @@ public class BusinessEvent {
     @Column(nullable = false, length = 20)
     private BusinessEvent.EventDirection eventDirection;
 
-    @CreatedBy
-    @Column(nullable = false, updatable = false, length = 100)
-    private String createdBy;
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdTimestamp;
-
-    @LastModifiedBy
-    @Column(nullable = false, length = 100)
-    private String updatedBy;
-
-    @LastModifiedDate
-    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updatedTimestamp;
+    @Embedded
+    private Traceable traceable = new Traceable();
 
     // Constructors
     public BusinessEvent() {
@@ -71,9 +52,10 @@ public class BusinessEvent {
         this.aggregateName = aggregateName;
         this.eventName = eventName;
         this.eventPayload = eventPayload;
-        this.schema = schema;
+        this.schemaVersion = schema;
         this.correlationId = correlationId;
         this.eventDirection = eventDirection;
+        this.traceable = new Traceable();
     }
 
     // Getters and Setters
@@ -125,12 +107,12 @@ public class BusinessEvent {
         this.eventPayload = eventPayload;
     }
 
-    public String getSchema() {
-        return schema;
+    public String getSchemaVersion() {
+        return schemaVersion;
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+    public void setSchemaVersion(String schema) {
+        this.schemaVersion = schema;
     }
 
     public String getCorrelationId() {
@@ -149,36 +131,12 @@ public class BusinessEvent {
         this.eventDirection = eventDirection;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public Traceable getTraceable() {
+        return traceable;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public LocalDateTime getCreatedTimestamp() {
-        return createdTimestamp;
-    }
-
-    public void setCreatedTimestamp(LocalDateTime createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public LocalDateTime getUpdatedTimestamp() {
-        return updatedTimestamp;
-    }
-
-    public void setUpdatedTimestamp(LocalDateTime updatedTimestamp) {
-        this.updatedTimestamp = updatedTimestamp;
+    public void setTraceable(Traceable traceable) {
+        this.traceable = traceable != null ? traceable : new Traceable();
     }
 
     @Override
@@ -190,13 +148,10 @@ public class BusinessEvent {
                 ", aggregateName='" + aggregateName + '\'' +
                 ", eventName='" + eventName + '\'' +
                 ", eventPayload='" + eventPayload + '\'' +
-                ", schema='" + schema + '\'' +
+                ", schema='" + schemaVersion + '\'' +
                 ", correlationId='" + correlationId + '\'' +
                 ", eventDirection='" + eventDirection + '\'' +
-                ", createdBy='" + createdBy + '\'' +
-                ", createdTimestamp=" + createdTimestamp +
-                ", updatedBy='" + updatedBy + '\'' +
-                ", updatedTimestamp=" + updatedTimestamp +
+                ", traceable=" + traceable +
                 '}';
     }
 
