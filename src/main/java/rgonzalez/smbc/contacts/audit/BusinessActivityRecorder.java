@@ -9,8 +9,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import rgonzalez.smbc.contacts.dao.BusinessEventRepository;
@@ -154,19 +152,4 @@ public class BusinessActivityRecorder {
         return (aggregateName.toLowerCase() + "-" + eventName.toLowerCase()).replaceAll("([a-z])([A-Z])", "$1-$2")
                 .toLowerCase();
     }
-
-    /**
-     * Retrieves the current authenticated username from Spring Security context
-     * 
-     * @return the username of the authenticated user, or "SYSTEM" if no user is
-     *         authenticated
-     */
-    // private String getCurrentUsername() {
-    // Authentication authentication =
-    // SecurityContextHolder.getContext().getAuthentication();
-    // if (authentication != null && authentication.isAuthenticated()) {
-    // return authentication.getName();
-    // }
-    // return "SYSTEM";
-    // }
 }
