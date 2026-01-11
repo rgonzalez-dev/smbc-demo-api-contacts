@@ -10,6 +10,8 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,7 +63,19 @@ public class OpenAPIConfig {
                 // Initialize components and add error response schema
                 Components components = new Components();
                 components.addSchemas("ErrorResponse", createErrorSchema());
+
+                // Add JWT security scheme
+                components.addSecuritySchemes("BearerAuth",
+                                new SecurityScheme()
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")
+                                                .description("JWT token obtained from /api/v1/token endpoint"));
+
                 openAPI.setComponents(components);
+
+                // Add security requirement to all endpoints
+                openAPI.addSecurityItem(new SecurityRequirement().addList("BearerAuth"));
 
                 return openAPI;
         }

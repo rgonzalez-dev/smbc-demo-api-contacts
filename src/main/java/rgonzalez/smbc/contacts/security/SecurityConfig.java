@@ -28,8 +28,10 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 // Allow public access to actuator health endpoint
                                                 .requestMatchers("/actuator/health").permitAll()
+                                                // Allow public access to token generation endpoint
+                                                .requestMatchers("/api/v1/token/**").permitAll()
                                                 // Allow temp public access to contact management endpoints
-                                                .requestMatchers("/api/v1/contacts/**").permitAll()
+                                                // .requestMatchers("/api/v1/contacts/**").permitAll()
                                                 // All other requests require authentication
                                                 .anyRequest().authenticated())
                                 .csrf(csrf -> csrf.disable());

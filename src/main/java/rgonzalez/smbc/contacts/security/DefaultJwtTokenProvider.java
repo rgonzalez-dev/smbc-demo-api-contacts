@@ -16,7 +16,7 @@ import java.util.Base64;
  * "exp": timestamp, ... }
  */
 @Component
-@ConditionalOnMissingBean(JwtTokenProvider.class)
+// @ConditionalOnMissingBean(JwtTokenProvider.class)
 public class DefaultJwtTokenProvider implements JwtTokenProvider {
 
     @Override
